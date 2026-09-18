@@ -480,6 +480,55 @@
       renderGallery();
     }
 
+
+    function createPhotoId() {
+      if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+        return window.crypto.randomUUID();
+      }
+      return `photo-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    }
+
+    function canvasToBlob(canvas, type, quality) {
+      return new Promise((resolve, reject) => {
+        canvas.toBlob(blob => {
+          if (blob) resolve(blob);
+          else reject(new Error('Could not prepare image for upload.'));
+        }, type, quality);
+      });
+    }
+
+    async function prepareImageForUpload(file) {
+      if (!file.type.startsWith('image/')) return null;
+      if (file.type === 'image/gif') return file;
+
+      const imageUrl = URL.createObjectURL(file);
+      const image = new Image();
+      image.decoding = 'async';
+
+      try {
+        await new Promise((resolve, reject) => {
+          image.onload = resolve;
+          image.onerror = () => reject(new Error('This image format is not supported by this browser. Try screenshot/save as JPG first.'));
+          image.src = imageUrl;
+        });
+
+        const maxSide = 1800;
+        const scale = Math.min(1, maxSide / Math.max(image.naturalWidth || image.width, image.naturalHeight || image.height));
+        const width = Math.max(1, Math.round((image.naturalWidth || image.width) * scale));
+        const height = Math.max(1, Math.round((image.naturalHeight || image.height) * scale));
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(image, 0, 0, width, height);
+        return await canvasToBlob(canvas, 'image/jpeg', 0.82);
+      } catch (err) {
+        console.warn('Image conversion skipped:', err);
+        return file;
+      } finally {
+        URL.revokeObjectURL(imageUrl);
+      }
+    }
     async function uploadToCloudinary(file) {
       const formData = new FormData();
       formData.append('file', file);
@@ -738,14 +787,17 @@
         for (const file of files) {
           if (!file.type.startsWith('image/')) continue;
 
-          const id = crypto.randomUUID();
-          const cloudinaryResult = await uploadToCloudinary(file);
+          const preparedFile = await prepareImageForUpload(file);
+          if (!preparedFile) continue;
+
+          const id = createPhotoId();
+          const cloudinaryResult = await uploadToCloudinary(preparedFile);
           const url = cloudinaryResult.secure_url;
 
           await setDoc(doc(firestore, 'photos', id), {
             name: 'Memory',
-            type: file.type,
-            size: file.size,
+            type: preparedFile.type || file.type,
+            size: preparedFile.size || file.size,
             createdAt: Date.now(),
             message,
             tag,
@@ -760,13 +812,12 @@
         await fetchPhotosFromDB();
       } catch (err) {
         console.error('Upload failed:', err);
-        alert('Upload tak lepas lagi. Check Cloudinary preset and Firestore rules dulu.');
+        alert(`Upload tak lepas lagi: ${err.message || 'unknown error'}`);
       } finally {
         savePhotosBtn.disabled = false;
         savePhotosBtn.classList.remove('opacity-60', 'cursor-wait');
       }
     });
-
     // Drag & Drop visual highlights
     const dropZone = document.getElementById('dropZone');
     ['dragenter', 'dragover'].forEach(eventName => {
@@ -903,6 +954,9 @@
   </script>
 </body>
 </html>
+
+
+
 
 
 
