@@ -145,7 +145,7 @@
             </div>
             <div>
               <span id="statStorageSize" class="block font-serif text-2xl sm:text-3xl font-semibold">0 KB</span>
-              <span class="text-xs text-paper-800/50 dark:text-paper-100/50 uppercase tracking-wider font-medium">Local Storage</span>
+              <span class="text-xs text-paper-800/50 dark:text-paper-100/50 uppercase tracking-wider font-medium">Cloudinary</span>
             </div>
           </div>
         </div>
@@ -174,7 +174,7 @@
             <h2 class="font-serif text-2xl sm:text-3xl font-medium mt-1">Add photo + note</h2>
           </div>
           <p class="text-xs text-paper-800/50 dark:text-paper-100/50 max-w-sm">
-            Tulis sikit, upload gambar, settle. Semua simpan dalam browser ni je.
+            Tulis sikit, upload gambar, settle. Nanti kita dua-dua boleh nampak dekat link yang sama.
           </p>
         </div>
 
@@ -357,14 +357,29 @@
 
   <!-- Footer -->
   <footer class="border-t border-paper-200/80 dark:border-paper-800 py-8 text-center text-xs text-paper-800/50 dark:text-paper-100/50">
-    <p>Farhan & Meera · saved here only</p>
+    <p>Farhan & Meera · shared through Cloudinary + Firestore</p>
   </footer>
 
-  <script>
-    /* Application Constants & IndexedDB Config */
-    const DB_NAME = 'farhan_meera_gallery_db';
-    const DB_VERSION = 1;
-    const STORE_NAME = 'photos';
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+    import { getFirestore, collection, getDocs, doc, setDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD0d5vLa36td2zZQZOZgirtzFf987-YxQ0",
+      authDomain: "meerandpaan.firebaseapp.com",
+      projectId: "meerandpaan",
+      storageBucket: "meerandpaan.firebasestorage.app",
+      messagingSenderId: "63572897478",
+      appId: "1:63572897478:web:bcb81309b00e1b358931c7"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const firestore = getFirestore(app);
+    const photosCollection = collection(firestore, 'photos');
+    const CLOUDINARY_CLOUD_NAME = 'meerpan';
+    const CLOUDINARY_UPLOAD_PRESET = 'dsxsq7wbi';
+
+    /* Application Constants & Firebase Config */
 
     // State Variables
     let photos = [];
@@ -394,36 +409,11 @@
     const uploadMessage = document.getElementById('uploadMessage');
     const uploadTag = document.getElementById('uploadTag');
     const fileCountBadge = document.getElementById('fileCountBadge');
+    const savePhotosBtn = document.getElementById('savePhotosBtn');
 
     /* ==========================================================
-       1. INDEXED DB STORAGE ENGINE & INITIAL SEEDING
+       1. CLOUDINARY ENGINE
        ========================================================== */
-    function openDB() {
-      return new Promise((resolve, reject) => {
-        const request = indexedDB.open(DB_NAME, DB_VERSION);
-        request.onupgradeneeded = (e) => {
-          const db = e.target.result;
-          if (!db.objectStoreNames.contains(STORE_NAME)) {
-            db.createObjectStore(STORE_NAME, { keyPath: 'id' });
-          }
-        };
-        request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject(request.error);
-      });
-    }
-
-    async function withStore(mode, callback) {
-      const db = await openDB();
-      return new Promise((resolve, reject) => {
-        const tx = db.transaction(STORE_NAME, mode);
-        const store = tx.objectStore(STORE_NAME);
-        const result = callback(store);
-        tx.oncomplete = () => { db.close(); resolve(result); };
-        tx.onerror = () => { db.close(); reject(tx.error); };
-      });
-    }
-
-    /* Clean old ObjectURLs from memory */
     function revokeActiveUrls() {
       createdBlobUrls.forEach(url => URL.revokeObjectURL(url));
       createdBlobUrls = [];
@@ -434,8 +424,10 @@
       createdBlobUrls.push(url);
       return url;
     }
+
     function getPhotoSource(photo) {
       if (!photo) return '';
+      if (photo.url) return photo.url;
       if (photo.blob) {
         try {
           return createTrackedUrl(photo.blob);
@@ -443,12 +435,12 @@
           console.warn('Could not create image URL:', err);
         }
       }
-      return photo.url || '';
+      return '';
     }
-
 
     function getHeroPhotoSource(photo) {
       if (!photo) return '';
+      if (photo.url) return photo.url;
       if (photo.blob) {
         try {
           if (heroBlobUrl) URL.revokeObjectURL(heroBlobUrl);
@@ -458,8 +450,9 @@
           console.warn('Could not create hero image URL:', err);
         }
       }
-      return photo.url || '';
+      return '';
     }
+
     function setImageOrPlaceholder(img, placeholder, src) {
       if (!img) return;
       img.onerror = () => {
@@ -480,108 +473,32 @@
       img.src = src;
     }
 
-    /* Seed Default High-End Curated Sample Photos on First Launch */
-    async function seedInitialDataIfEmpty() {
-      const existing = await withStore('readonly', store => store.getAll());
-      if (existing.request && existing.request.result && existing.request.result.length > 0) return;
-
-      // Seed presets if store is totally empty
-      const samplePresets = [
-        {
-          id: 'preset-1',
-          name: 'Golden Sunset at Amalfi',
-          message: 'This one feels warm. macam we just wanted to stay there a bit longer.',
-          tag: 'Travel',
-          isFavorite: true,
-          createdAt: Date.now() - 86400000 * 5,
-          url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1000&q=80'
-        },
-        {
-          id: 'preset-2',
-          name: 'Cozy Candlelight Dinner',
-          message: 'Dinner kecil, cerita banyak. cute night.',
-          tag: 'Date Night',
-          isFavorite: true,
-          createdAt: Date.now() - 86400000 * 12,
-          url: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1000&q=80'
-        },
-        {
-          id: 'preset-3',
-          name: 'Autumn Morning Walk',
-          message: 'Random walk, but somehow jadi memory.',
-          tag: 'Everyday',
-          isFavorite: false,
-          createdAt: Date.now() - 86400000 * 20,
-          url: 'https://images.unsplash.com/photo-1476514525535-ce74f45814d3?auto=format&fit=crop&w=1000&q=80'
-        },
-        {
-          id: 'preset-4',
-          name: 'Paris Rooftop Dreams',
-          message: 'One of those views yang rasa macam movie sikit.',
-          tag: 'Travel',
-          isFavorite: true,
-          createdAt: Date.now() - 86400000 * 30,
-          url: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=1000&q=80'
-        }
-      ];
-
-      for (const preset of samplePresets) {
-        try {
-          const res = await fetch(preset.url);
-          const blob = await res.blob();
-          await withStore('readwrite', store => {
-            store.put({
-              id: preset.id,
-              name: preset.name,
-              type: blob.type || 'image/jpeg',
-              size: blob.size,
-              createdAt: preset.createdAt,
-              message: preset.message,
-              tag: preset.tag,
-              isFavorite: preset.isFavorite,
-              blob: blob
-            });
-          });
-        } catch (err) {
-          console.warn('Failed to seed preset image:', err);
-        }
-      }
-    }
-
-
-    async function softenPresetMessages() {
-      const presetMessages = {
-        'preset-1': 'This one feels warm. macam we just wanted to stay there a bit longer.',
-        'preset-2': 'Dinner kecil, cerita banyak. cute night.',
-        'preset-3': 'Random walk, but somehow jadi memory.',
-        'preset-4': 'One of those views yang rasa macam movie sikit.'
-      };
-
-      await withStore('readwrite', store => {
-        Object.entries(presetMessages).forEach(([id, message]) => {
-          const req = store.get(id);
-          req.onsuccess = () => {
-            const photo = req.result;
-            if (!photo) return;
-            photo.message = message;
-            photo.name = 'Memory';
-            store.put(photo);
-          };
-        });
-      });
-    }
     async function fetchPhotosFromDB() {
-      await withStore('readonly', store => {
-        const req = store.getAll();
-        req.onsuccess = () => {
-          photos = req.result || [];
-          updateAnalyticsAndFeatured();
-          renderGallery();
-        };
-      });
+      const snapshot = await getDocs(photosCollection);
+      photos = snapshot.docs.map(photoDoc => ({ id: photoDoc.id, ...photoDoc.data() }));
+      updateAnalyticsAndFeatured();
+      renderGallery();
     }
 
-    /* ==========================================================
+    async function uploadToCloudinary(file) {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+      formData.append('folder', 'farhan-meera-gallery');
+
+      const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Cloudinary upload failed: ${errorText}`);
+      }
+
+      return response.json();
+    }
+/* ==========================================================
        2. ANALYTICS & HERO HIGHLIGHT ENGINE
        ========================================================== */
     function updateAnalyticsAndFeatured() {
@@ -776,7 +693,7 @@
       if (!target) return;
       target.isFavorite = !target.isFavorite;
 
-      await withStore('readwrite', store => store.put(target));
+      await updateDoc(doc(firestore, 'photos', id), { isFavorite: target.isFavorite });
       if (photoModal.open && currentLightboxList[activePhotoIndex]?.id === id) {
         updateModalFavIcon(target.isFavorite);
       }
@@ -788,7 +705,7 @@
       const activePhoto = currentLightboxList[activePhotoIndex];
       if (!activePhoto) return;
 
-      await withStore('readwrite', store => store.delete(activePhoto.id));
+      await deleteDoc(doc(firestore, 'photos', activePhoto.id));
       photoModal.close();
       await fetchPhotosFromDB();
     }
@@ -804,39 +721,50 @@
        ========================================================== */
     photoInput.addEventListener('change', (e) => {
       const count = e.target.files.length;
-      fileCountBadge.textContent = count > 0 ? `${count} photo(s) selected for upload` : 'Supports PNG, JPG, WEBP up to 20MB';
+      fileCountBadge.textContent = count > 0 ? `${count} photo(s) ready to upload` : 'PNG, JPG, WEBP, GIF pun boleh';
     });
 
     uploadForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const files = photoInput.files;
+      const files = Array.from(photoInput.files || []);
       if (!files.length) return;
 
       const message = uploadMessage.value.trim();
       const tag = uploadTag.value;
+      savePhotosBtn.disabled = true;
+      savePhotosBtn.classList.add('opacity-60', 'cursor-wait');
 
-      await withStore('readwrite', store => {
-        Array.from(files).forEach(file => {
-          if (file.type.startsWith('image/')) {
-            store.put({
-              id: crypto.randomUUID(),
-              name: "Memory",
-              type: file.type,
-              size: file.size,
-              createdAt: Date.now(),
-              message: message,
-              tag: tag,
-              isFavorite: false,
-              blob: file
-            });
-          }
-        });
-      });
+      try {
+        for (const file of files) {
+          if (!file.type.startsWith('image/')) continue;
 
-      // Reset Form Inputs
-      uploadForm.reset();
-      fileCountBadge.textContent = 'Supports PNG, JPG, WEBP up to 20MB';
-      await fetchPhotosFromDB();
+          const id = crypto.randomUUID();
+          const cloudinaryResult = await uploadToCloudinary(file);
+          const url = cloudinaryResult.secure_url;
+
+          await setDoc(doc(firestore, 'photos', id), {
+            name: 'Memory',
+            type: file.type,
+            size: file.size,
+            createdAt: Date.now(),
+            message,
+            tag,
+            isFavorite: false,
+            cloudinaryPublicId: cloudinaryResult.public_id,
+            url
+          });
+        }
+
+        uploadForm.reset();
+        fileCountBadge.textContent = 'PNG, JPG, WEBP, GIF pun boleh';
+        await fetchPhotosFromDB();
+      } catch (err) {
+        console.error('Upload failed:', err);
+        alert('Upload tak lepas lagi. Check Cloudinary preset and Firestore rules dulu.');
+      } finally {
+        savePhotosBtn.disabled = false;
+        savePhotosBtn.classList.remove('opacity-60', 'cursor-wait');
+      }
     });
 
     // Drag & Drop visual highlights
@@ -966,16 +894,21 @@
     /* Initialize Application */
     window.onload = async () => {
       try {
-        await seedInitialDataIfEmpty();
-        await softenPresetMessages();
         await fetchPhotosFromDB();
       } catch (err) {
-        console.error('Database initialization failed:', err);
+        console.error('Firebase initialization failed:', err);
+        emptyState.classList.remove('hidden');
       }
     };
   </script>
 </body>
 </html>
+
+
+
+
+
+
 
 
 
