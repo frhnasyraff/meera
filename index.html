@@ -4,16 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Farhan & Meera — Digital Albums & Gallery</title>
-  
+
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  
+
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
-    // Semak tema tersimpan sebelum paparan dirender untuk elak flickering
     if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
       document.documentElement.classList.add('dark');
     } else {
@@ -107,7 +106,7 @@
         </div>
       </a>
 
-      <div class="flex items-center gap-2 min-w-0">
+      <div class="flex items-center gap-3">
         <button id="themeToggleBtn" type="button" class="p-2.5 rounded-full hover:bg-paper-200/50 dark:hover:bg-paper-800/50 text-paper-800/70 dark:text-paper-100/70 transition-colors" title="Toggle Theme">
           <svg id="sunIcon" class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
           <svg id="moonIcon" class="w-5 h-5 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
@@ -136,7 +135,7 @@
             <span class="italic font-normal text-terracotta-500 dark:text-terracotta-400">Sweet Memories</span>
           </h1>
           <p class="text-paper-800/70 dark:text-paper-100/70 text-base sm:text-lg max-w-xl font-light leading-relaxed">
-            Buat album khas untuk trip, date night, or mana-mana moment comel. Tekan mana-mana album untuk tengok gambar kat dalam.
+            Dekat sini kita boleh create albums and also boleh create for upcoming trips. Tekan je mana-mana album atau trips untuk kita tengok details.
           </p>
 
           <div class="pt-4 grid grid-cols-3 gap-4 border-t border-paper-200/80 dark:border-paper-800 max-w-md">
@@ -169,49 +168,79 @@
       </div>
     </section>
 
-    <!-- VIEW 1: ALBUMS GALLERY PAGE -->
-    <section id="albumsViewSection" class="space-y-8">
-      <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-paper-200/80 dark:border-paper-800 pb-6">
-        <div>
-          <p class="text-xs uppercase tracking-widest text-sage-500 font-semibold mb-1">Our Memory Collections</p>
-          <h2 class="font-serif text-3xl sm:text-5xl font-medium">Gallery Albums</h2>
+    <!-- VIEW 1: ALBUMS GALLERY & TRIPS PAGE -->
+    <div id="albumsViewSection" class="space-y-16">
+
+      <!-- ALBUMS SECTION -->
+      <section class="space-y-8">
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-paper-200/80 dark:border-paper-800 pb-6">
+          <div>
+            <p class="text-xs uppercase tracking-widest text-sage-500 font-semibold mb-1">Our Memory Collections</p>
+            <h2 class="font-serif text-3xl sm:text-5xl font-medium">Gallery Albums</h2>
+          </div>
+
+          <button id="btnCreateAlbumSection" type="button" class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-paper-800 dark:bg-paper-100 text-paper-50 dark:text-paper-900 text-sm font-semibold hover:bg-terracotta-500 dark:hover:bg-terracotta-400 dark:hover:text-white transition-all shadow-sm active:scale-95">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            <span>Create New Album</span>
+          </button>
         </div>
 
-        <button id="btnCreateAlbumSection" type="button" class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-paper-800 dark:bg-paper-100 text-paper-50 dark:text-paper-900 text-sm font-semibold hover:bg-terracotta-500 dark:hover:bg-terracotta-400 dark:hover:text-white transition-all shadow-sm active:scale-95">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-          <span>Create New Album</span>
-        </button>
-      </div>
+        <div id="albumsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
 
-      <div id="albumsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        <div id="albumsEmptyState" class="hidden text-center py-20 bg-white/50 dark:bg-paper-900/40 rounded-3xl border border-dashed border-paper-200 dark:border-paper-800">
+          <svg class="w-12 h-12 mx-auto text-paper-800/30 dark:text-paper-100/30 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+          <h3 class="font-serif text-2xl font-medium mb-1">Belum ada album</h3>
+          <p class="text-xs text-paper-800/50 dark:text-paper-100/50 max-w-sm mx-auto mb-4">Mula dengan cipta album baru untuk simpan kenangan gambar anda.</p>
+          <button id="btnEmptyCreateAlbum" class="px-5 py-2.5 rounded-xl bg-terracotta-500 text-white text-xs font-semibold hover:bg-terracotta-600 transition-all">Create First Album</button>
+        </div>
+      </section>
 
-      <div id="albumsEmptyState" class="hidden text-center py-20 bg-white/50 dark:bg-paper-900/40 rounded-3xl border border-dashed border-paper-200 dark:border-paper-800">
-        <svg class="w-12 h-12 mx-auto text-paper-800/30 dark:text-paper-100/30 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
-        <h3 class="font-serif text-2xl font-medium mb-1">Belum ada album</h3>
-        <p class="text-xs text-paper-800/50 dark:text-paper-100/50 max-w-sm mx-auto mb-4">Mula dengan cipta album baru untuk simpan kenangan gambar anda.</p>
-        <button id="btnEmptyCreateAlbum" class="px-5 py-2.5 rounded-xl bg-terracotta-500 text-white text-xs font-semibold hover:bg-terracotta-600 transition-all">Create First Album</button>
-      </div>
-    </section>
+<!-- TRIP SECTION (PAST & FUTURE TRIPS) -->
+      <section id="tripsSection" class="space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-paper-200/80 dark:border-paper-800 pb-6">
+          <div>
+            <p class="text-xs uppercase tracking-widest text-terracotta-500 font-semibold mb-1">Travel Plans & Itinerary</p>
+            <h2 class="font-serif text-3xl sm:text-5xl font-medium">Trip Plans</h2>
+          </div>
+
+          <!-- Susunan Butang Lebih Kemas di Mobile -->
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+            <div class="grid grid-cols-2 bg-paper-200/60 dark:bg-paper-900 p-1 rounded-xl text-center">
+              <button id="tabUpcomingTrips" class="px-4 py-2 sm:py-1.5 rounded-lg text-xs font-semibold bg-white dark:bg-paper-800 shadow-sm transition-all">Upcoming</button>
+              <button id="tabPastTrips" class="px-4 py-2 sm:py-1.5 rounded-lg text-xs font-semibold text-paper-800/60 dark:text-paper-100/60 hover:text-paper-800 transition-all">Past Trips</button>
+            </div>
+
+            <button id="btnOpenCreateTrip" type="button" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 sm:py-3 rounded-xl bg-paper-800 dark:bg-paper-100 text-paper-50 dark:text-paper-900 text-xs sm:text-sm font-semibold hover:bg-terracotta-500 dark:hover:bg-terracotta-400 dark:hover:text-white transition-all shadow-sm active:scale-95 w-full sm:w-auto">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+              <span>Create New Trip</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Trips List Container -->
+        <div id="tripsListGrid" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+
+        <div id="tripsEmptyState" class="hidden text-center py-12 px-4 bg-white/50 dark:bg-paper-900/40 rounded-3xl border border-dashed border-paper-200 dark:border-paper-800">
+          <p class="font-serif text-xl font-medium mb-1">Tiada trip dalam senarai ini</p>
+          <p class="text-xs text-paper-800/50 dark:text-paper-100/50 max-w-xs mx-auto">Rancang percutian seterusnya dengan menekan butang "Create New Trip".</p>
+        </div>
+      </section>
+
+    </div>
 
     <!-- VIEW 2: SINGLE ALBUM DETAIL PAGE -->
     <section id="albumDetailViewSection" class="hidden space-y-10">
-      
+
       <div class="flex items-center justify-between border-b border-paper-200/80 dark:border-paper-800 pb-4">
         <button id="btnBackToAlbums" type="button" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-paper-200/50 dark:bg-paper-900/80 hover:bg-paper-200 dark:hover:bg-paper-800 text-xs sm:text-sm font-medium transition-colors">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
           <span>Back to All Albums</span>
         </button>
 
-        <div class="flex items-center gap-2">
-        <button id="btnEditAlbum" type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-paper-800/70 dark:text-paper-100/70 hover:bg-paper-200/50 dark:hover:bg-paper-800 text-xs font-semibold transition-colors">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-          <span>Edit Album</span>
-        </button>
         <button id="btnDeleteAlbum" type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-rose-500 hover:bg-rose-500/10 text-xs font-semibold transition-colors">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
           <span>Delete Album</span>
         </button>
-        </div>
       </div>
 
       <div class="relative rounded-3xl overflow-hidden bg-paper-900 text-white p-8 sm:p-12 min-h-[220px] flex flex-col justify-end border border-paper-800">
@@ -310,6 +339,97 @@
 
   </main>
 
+  <!-- CREATE NEW TRIP MODAL -->
+  <dialog id="createTripModal" class="bg-transparent backdrop:bg-paper-950/80 backdrop:backdrop-blur-sm p-0 max-w-2xl w-full rounded-3xl border-0 focus:outline-none">
+    <div class="bg-white dark:bg-paper-900 text-paper-800 dark:text-paper-100 p-6 sm:p-8 rounded-3xl shadow-2xl border border-paper-200 dark:border-paper-800 space-y-6 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-paper-200 dark:border-paper-800 pb-4">
+        <div>
+          <span class="text-[10px] tracking-widest uppercase font-semibold text-terracotta-500 dark:text-terracotta-400">Travel Plan</span>
+          <h3 class="font-serif text-2xl font-medium">Create New Trip</h3>
+        </div>
+        <button id="closeCreateTripModal" type="button" class="p-2 rounded-full hover:bg-paper-100 dark:hover:bg-paper-800">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <form id="createTripForm" class="space-y-6">
+        <!-- 1. Trip Details -->
+        <div class="space-y-4">
+          <h4 class="font-serif text-lg font-semibold text-terracotta-600 dark:text-terracotta-400 border-b border-paper-100 dark:border-paper-800 pb-1">1. Trip Details</h4>
+
+          <div class="space-y-1">
+            <label for="tripDestination" class="text-xs font-semibold uppercase tracking-wider text-paper-800/60 dark:text-paper-100/60">Destination *</label>
+            <input type="text" id="tripDestination" required placeholder="e.g., Cameron Highlands / Kundasang, Sabah" class="w-full px-4 py-2.5 rounded-xl bg-paper-50 dark:bg-paper-950 border border-paper-200 dark:border-paper-800 text-sm focus:outline-none focus:border-terracotta-500">
+          </div>
+
+          <div class="space-y-2">
+            <label class="text-xs font-semibold uppercase tracking-wider text-paper-800/60 dark:text-paper-100/60">Trip Type *</label>
+            <div class="flex items-center gap-6">
+              <label class="inline-flex items-center gap-2 cursor-pointer text-sm">
+                <input type="radio" name="tripType" value="Day Trip" checked class="accent-terracotta-500">
+                <span>Day Trip (Balik Hari)</span>
+              </label>
+              <label class="inline-flex items-center gap-2 cursor-pointer text-sm">
+                <input type="radio" name="tripType" value="Overnight" class="accent-terracotta-500">
+                <span>Overnight (Tidur Sana)</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Accommodation Info (Overnight Only) -->
+        <div id="accommodationSection" class="hidden space-y-4 bg-paper-50/50 dark:bg-paper-950/50 p-4 rounded-2xl border border-paper-200/60 dark:border-paper-800">
+          <h4 class="font-serif text-lg font-semibold text-terracotta-600 dark:text-terracotta-400 border-b border-paper-200/60 dark:border-paper-800 pb-1">2. Accommodation Info</h4>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="space-y-1">
+              <label for="tripNights" class="text-xs font-semibold uppercase tracking-wider text-paper-800/60 dark:text-paper-100/60">How many nights?</label>
+              <select id="tripNights" class="w-full px-4 py-2 rounded-xl bg-white dark:bg-paper-900 border border-paper-200 dark:border-paper-800 text-sm focus:outline-none focus:border-terracotta-500">
+                <option value="1">1 Night</option>
+                <option value="2" selected>2 Nights</option>
+                <option value="3">3 Nights</option>
+                <option value="4">4 Nights</option>
+                <option value="5+">5+ Nights</option>
+              </select>
+            </div>
+
+            <div class="space-y-1">
+              <label for="checkInDate" class="text-xs font-semibold uppercase tracking-wider text-paper-800/60 dark:text-paper-100/60">Check-in Date</label>
+              <input type="date" id="checkInDate" class="w-full px-4 py-2 rounded-xl bg-white dark:bg-paper-900 border border-paper-200 dark:border-paper-800 text-xs focus:outline-none focus:border-terracotta-500">
+            </div>
+
+            <div class="space-y-1">
+              <label for="checkOutDate" class="text-xs font-semibold uppercase tracking-wider text-paper-800/60 dark:text-paper-100/60">Check-out Date</label>
+              <input type="date" id="checkOutDate" class="w-full px-4 py-2 rounded-xl bg-white dark:bg-paper-900 border border-paper-200 dark:border-paper-800 text-xs focus:outline-none focus:border-terracotta-500">
+            </div>
+          </div>
+        </div>
+
+<!-- 3. Activity Wishlist -->
+<div class="space-y-3 pt-2">
+  <div class="flex items-center justify-between border-b border-paper-200 dark:border-paper-800 pb-2">
+    <div class="flex items-center gap-2">
+      <span class="font-serif text-base sm:text-lg font-semibold text-terracotta-500">3.</span>
+      <h4 class="font-serif text-base sm:text-lg font-semibold">Activity & Location Wishlist</h4>
+    </div>
+    <button id="btnAddActivityRow" type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-terracotta-500/10 hover:bg-terracotta-500/20 text-terracotta-500 text-xs font-semibold transition-all active:scale-95">
+      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+      <span>Add Activity</span>
+    </button>
+  </div>
+
+  <!-- Container tempat cadangan aktiviti ditambah -->
+  <div id="activitiesContainer" class="space-y-2.5"></div>
+</div>
+
+        <div class="pt-4 flex justify-end gap-3 border-t border-paper-200 dark:border-paper-800">
+          <button type="button" id="cancelCreateTripBtn" class="px-4 py-2 rounded-xl text-xs font-medium hover:bg-paper-100 dark:hover:bg-paper-800">Cancel</button>
+          <button type="submit" id="submitCreateTripBtn" class="px-5 py-2 rounded-xl bg-terracotta-500 hover:bg-terracotta-600 text-white text-xs font-semibold transition-all">Save Trip</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
   <!-- CREATE NEW ALBUM DIALOG MODAL -->
   <dialog id="createAlbumModal" class="bg-transparent backdrop:bg-paper-950/80 backdrop:backdrop-blur-sm p-0 max-w-lg w-full rounded-3xl border-0 focus:outline-none">
     <div class="bg-white dark:bg-paper-900 text-paper-800 dark:text-paper-100 p-6 sm:p-8 rounded-3xl shadow-2xl border border-paper-200 dark:border-paper-800 space-y-6">
@@ -359,26 +479,23 @@
 
   <!-- Fullscreen Modal / Lightbox -->
   <dialog id="photoModal" class="bg-transparent backdrop:bg-paper-950/90 backdrop:backdrop-blur-md p-0 max-w-none w-full h-full border-0 focus:outline-none">
-    <div id="photoModalShell" class="w-full min-h-full flex flex-col justify-start sm:justify-between p-3 sm:p-8 text-white relative overflow-y-auto">
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 z-20 shrink-0">
-        <div class="flex items-center gap-2 min-w-0">
+    <div class="w-full h-full flex flex-col justify-between p-4 sm:p-8 text-white relative">
+      <div class="flex items-center justify-between z-20">
+        <div class="flex items-center gap-3">
           <span id="modalTagBadge" class="px-3 py-1 rounded-full bg-white/10 backdrop-blur text-xs font-semibold uppercase tracking-wider text-terracotta-400">Category</span>
-          <span id="modalDateText" class="text-xs text-white/70 leading-tight">Date</span>
+          <span id="modalDateText" class="text-xs text-white/70">Date</span>
         </div>
 
-        <div class="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 -mx-1 px-1">
+        <div class="flex items-center gap-2">
           <!-- Edit Caption Button -->
           <button id="modalEditBtn" type="button" class="p-2.5 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur transition-all" title="Edit Caption">
             <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
           </button>
 
-          <button id="modalCropBtn" type="button" class="p-2.5 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur transition-all" title="Crop Photo">
-            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 2v14a2 2 0 002 2h14M18 22V8a2 2 0 00-2-2H2"/></svg>
-          </button>
           <button id="modalFavBtn" type="button" class="p-2.5 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur transition-all" title="Toggle Favorite">
             <svg id="modalFavIcon" class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
           </button>
-          
+
           <a id="modalDownloadBtn" download="memory.jpg" class="p-2.5 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur transition-all" title="Download Image">
             <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
           </a>
@@ -387,25 +504,25 @@
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
           </button>
 
-          <button id="modalCloseBtn" type="button" class="order-first sm:order-none inline-flex items-center gap-2 px-3 py-2.5 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur transition-all shrink-0" title="Close">
-            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg><span class="text-xs font-semibold sm:hidden">Back</span>
+          <button id="modalCloseBtn" type="button" class="p-2.5 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur transition-all ml-2" title="Close (Esc)">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
           </button>
         </div>
       </div>
 
-      <div class="relative flex flex-1 items-center justify-center my-4 min-h-[45vh] sm:min-h-0 overflow-hidden">
-        <button id="prevPhotoBtn" class="absolute left-1 sm:left-4 z-20 p-3 rounded-full bg-black/30 sm:bg-white/10 hover:bg-white/20 backdrop-blur text-white transition-all">
+      <div class="relative flex-1 flex items-center justify-center my-4 overflow-hidden">
+        <button id="prevPhotoBtn" class="absolute left-0 sm:left-4 z-20 p-3 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur text-white transition-all">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
         </button>
 
-        <img id="modalImage" src="" alt="Full view memory" class="max-h-[58vh] sm:max-h-[75vh] max-w-full object-contain rounded-lg shadow-2xl transition-transform duration-300">
+        <img id="modalImage" src="" alt="Full view memory" class="max-h-[75vh] max-w-full object-contain rounded-lg shadow-2xl transition-transform duration-300">
 
-        <button id="nextPhotoBtn" class="absolute right-1 sm:right-4 z-20 p-3 rounded-full bg-black/30 sm:bg-white/10 hover:bg-white/20 backdrop-blur text-white transition-all">
+        <button id="nextPhotoBtn" class="absolute right-0 sm:right-4 z-20 p-3 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur text-white transition-all">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
         </button>
       </div>
 
-      <div class="max-w-3xl mx-auto w-full text-center space-y-2 bg-white/10 backdrop-blur-md p-4 sm:p-6 rounded-2xl border border-white/10 shrink-0">
+      <div class="max-w-3xl mx-auto w-full text-center space-y-2 bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/10">
         <!-- Caption View Container -->
         <div id="captionDisplayContainer" class="space-y-1">
           <p id="modalNote" class="font-serif italic text-base sm:text-lg text-white">"Wish or note text..."</p>
@@ -425,55 +542,6 @@
     </div>
   </dialog>
 
-
-  <!-- CROP PHOTO DIALOG MODAL -->
-  <dialog id="cropModal" class="bg-transparent backdrop:bg-paper-950/80 backdrop:backdrop-blur-sm p-0 w-[calc(100vw-24px)] max-w-2xl rounded-3xl border-0 focus:outline-none">
-    <div class="bg-white dark:bg-paper-900 text-paper-800 dark:text-paper-100 p-5 sm:p-7 rounded-3xl shadow-2xl border border-paper-200 dark:border-paper-800 space-y-5">
-      <div class="flex items-center justify-between border-b border-paper-200 dark:border-paper-800 pb-4">
-        <div>
-          <span class="text-[10px] tracking-widest uppercase font-semibold text-terracotta-500 dark:text-terracotta-400">Crop Photo</span>
-          <h3 class="font-serif text-2xl font-medium">Adjust dulu</h3>
-        </div>
-        <button id="closeCropModal" type="button" class="p-2 rounded-full hover:bg-paper-100 dark:hover:bg-paper-800">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-        </button>
-      </div>
-
-      <div class="rounded-2xl overflow-hidden bg-paper-100 dark:bg-paper-950 border border-paper-200 dark:border-paper-800 flex items-center justify-center p-3">
-        <canvas id="cropCanvas" class="max-w-full rounded-xl bg-black/10"></canvas>
-      </div>
-
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <label class="space-y-1 text-xs font-semibold uppercase tracking-wider text-paper-800/60 dark:text-paper-100/60">
-          Shape
-          <select id="cropAspectSelect" class="w-full px-3 py-2 rounded-xl bg-paper-50 dark:bg-paper-950 border border-paper-200 dark:border-paper-800 text-sm font-normal normal-case tracking-normal focus:outline-none focus:border-terracotta-500">
-            <option value="original">Original</option>
-            <option value="1">Square</option>
-            <option value="0.8">Portrait</option>
-            <option value="1.333">Landscape</option>
-          </select>
-        </label>
-        <label class="space-y-1 text-xs font-semibold uppercase tracking-wider text-paper-800/60 dark:text-paper-100/60">
-          Zoom
-          <input id="cropZoomRange" type="range" min="1" max="3" step="0.01" value="1" class="w-full accent-terracotta-500">
-        </label>
-        <label class="space-y-1 text-xs font-semibold uppercase tracking-wider text-paper-800/60 dark:text-paper-100/60">
-          Move X
-          <input id="cropXRange" type="range" min="-100" max="100" step="1" value="0" class="w-full accent-terracotta-500">
-        </label>
-        <label class="space-y-1 text-xs font-semibold uppercase tracking-wider text-paper-800/60 dark:text-paper-100/60">
-          Move Y
-          <input id="cropYRange" type="range" min="-100" max="100" step="1" value="0" class="w-full accent-terracotta-500">
-        </label>
-      </div>
-
-      <div class="flex flex-col sm:flex-row justify-end gap-3 border-t border-paper-200 dark:border-paper-800 pt-4">
-        <button id="skipCropBtn" type="button" class="px-4 py-2 rounded-xl text-xs font-medium hover:bg-paper-100 dark:hover:bg-paper-800">Use original</button>
-        <button id="cancelCropBtn" type="button" class="px-4 py-2 rounded-xl text-xs font-medium hover:bg-paper-100 dark:hover:bg-paper-800">Cancel</button>
-        <button id="applyCropBtn" type="button" class="px-5 py-2 rounded-xl bg-terracotta-500 hover:bg-terracotta-600 text-white text-xs font-semibold transition-all">Use Crop</button>
-      </div>
-    </div>
-  </dialog>
   <!-- Footer -->
   <footer class="border-t border-paper-200/80 dark:border-paper-800 py-8 text-center text-xs text-paper-800/50 dark:text-paper-100/50">
     <p>Farhan & Meera · shared through Cloudinary + Firestore</p>
@@ -496,11 +564,13 @@
     const firestore = getFirestore(app);
     const albumsCollection = collection(firestore, 'albums');
     const photosCollection = collection(firestore, 'photos');
+    const tripsCollection = collection(firestore, 'trips');
 
     const CLOUDINARY_CLOUD_NAME = 'dsxsq7wbi';
     const CLOUDINARY_UPLOAD_PRESET = 'meerpan';
 
     let albums = [];
+    let trips = [];
     let currentAlbum = null;
     let albumPhotos = [];
     let currentLayout = 'masonry';
@@ -508,13 +578,18 @@
     let currentSort = 'newest';
     let activePhotoIndex = -1;
     let lightboxList = [];
+    let currentTripTab = 'upcoming';
 
     const albumsViewSection = document.getElementById('albumsViewSection');
     const albumDetailViewSection = document.getElementById('albumDetailViewSection');
     const createAlbumModal = document.getElementById('createAlbumModal');
+    const createTripModal = document.getElementById('createTripModal');
 
     const albumsGrid = document.getElementById('albumsGrid');
     const albumsEmptyState = document.getElementById('albumsEmptyState');
+    const tripsListGrid = document.getElementById('tripsListGrid');
+    const tripsEmptyState = document.getElementById('tripsEmptyState');
+
     const galleryContainer = document.getElementById('galleryContainer');
     const photosEmptyState = document.getElementById('photosEmptyState');
 
@@ -530,13 +605,6 @@
     const captionDisplayContainer = document.getElementById('captionDisplayContainer');
     const captionEditContainer = document.getElementById('captionEditContainer');
     const editCaptionInput = document.getElementById('editCaptionInput');
-    const cropModal = document.getElementById('cropModal');
-    const cropCanvas = document.getElementById('cropCanvas');
-    const cropAspectSelect = document.getElementById('cropAspectSelect');
-    const cropZoomRange = document.getElementById('cropZoomRange');
-    const cropXRange = document.getElementById('cropXRange');
-    const cropYRange = document.getElementById('cropYRange');
-    let cropState = null;
 
     function createCustomId() {
       if (window.crypto && typeof window.crypto.randomUUID === 'function') {
@@ -545,129 +613,6 @@
       return `id-${Date.now()}-${Math.random().toString(36).slice(2)}`;
     }
 
-
-
-    function readImageSource(source) {
-      return new Promise((resolve, reject) => {
-        const image = new Image();
-        let objectUrl = '';
-        image.crossOrigin = 'anonymous';
-        image.onload = () => resolve({ image, objectUrl });
-        image.onerror = () => {
-          if (objectUrl) URL.revokeObjectURL(objectUrl);
-          reject(new Error('Image cannot be loaded for cropping.'));
-        };
-
-        if (source instanceof Blob) {
-          objectUrl = URL.createObjectURL(source);
-          image.src = objectUrl;
-        } else {
-          image.src = source;
-        }
-      });
-    }
-
-    function renderCropPreview() {
-      if (!cropState) return;
-      const image = cropState.image;
-      const imageW = image.naturalWidth || image.width;
-      const imageH = image.naturalHeight || image.height;
-      const rawAspect = cropAspectSelect.value === 'original' ? imageW / imageH : parseFloat(cropAspectSelect.value);
-      const aspect = Number.isFinite(rawAspect) && rawAspect > 0 ? rawAspect : imageW / imageH;
-      const zoom = parseFloat(cropZoomRange.value) || 1;
-
-      let cropW = imageW;
-      let cropH = imageW / aspect;
-      if (cropH > imageH) {
-        cropH = imageH;
-        cropW = imageH * aspect;
-      }
-
-      cropW = cropW / zoom;
-      cropH = cropH / zoom;
-      const maxX = Math.max(0, (imageW - cropW) / 2);
-      const maxY = Math.max(0, (imageH - cropH) / 2);
-      const sx = Math.min(Math.max(0, (imageW - cropW) / 2 + maxX * (parseFloat(cropXRange.value) || 0) / 100), imageW - cropW);
-      const sy = Math.min(Math.max(0, (imageH - cropH) / 2 + maxY * (parseFloat(cropYRange.value) || 0) / 100), imageH - cropH);
-
-      const outputW = 1200;
-      const outputH = Math.round(outputW / aspect);
-      cropCanvas.width = outputW;
-      cropCanvas.height = outputH;
-      cropCanvas.style.maxHeight = '52vh';
-      const ctx = cropCanvas.getContext('2d');
-      ctx.clearRect(0, 0, outputW, outputH);
-      ctx.drawImage(image, sx, sy, cropW, cropH, 0, 0, outputW, outputH);
-    }
-
-    async function openCropper(source, aspect = 'original') {
-      const loaded = await readImageSource(source);
-      cropAspectSelect.value = aspect;
-      cropZoomRange.value = '1';
-      cropXRange.value = '0';
-      cropYRange.value = '0';
-      cropState = { ...loaded, source };
-      renderCropPreview();
-      cropModal.showModal();
-
-      return new Promise(resolve => {
-        cropState.resolve = resolve;
-      });
-    }
-
-    function closeCropper(result) {
-      if (!cropState) return;
-      const { objectUrl, resolve } = cropState;
-      if (objectUrl) URL.revokeObjectURL(objectUrl);
-      cropState = null;
-      cropModal.close();
-      resolve(result || null);
-    }
-    function canvasToBlob(canvas, type, quality) {
-      return new Promise((resolve, reject) => {
-        canvas.toBlob(blob => {
-          if (blob) resolve(blob);
-          else reject(new Error('Could not prepare image for upload.'));
-        }, type, quality);
-      });
-    }
-
-    async function prepareImageForUpload(file, askCrop = false, cropAspect = 'original') {
-      if (!file || !file.type.startsWith('image/')) return null;
-      if (file.type === 'image/gif') return file;
-      if (askCrop) {
-        const cropped = await openCropper(file, cropAspect);
-        if (cropped) return cropped;
-      }
-
-      const imageUrl = URL.createObjectURL(file);
-      const image = new Image();
-      image.decoding = 'async';
-
-      try {
-        await new Promise((resolve, reject) => {
-          image.onload = resolve;
-          image.onerror = () => reject(new Error('This image format is not supported here. Try screenshot/save as JPG first.'));
-          image.src = imageUrl;
-        });
-
-        const maxSide = 1800;
-        const scale = Math.min(1, maxSide / Math.max(image.naturalWidth || image.width, image.naturalHeight || image.height));
-        const width = Math.max(1, Math.round((image.naturalWidth || image.width) * scale));
-        const height = Math.max(1, Math.round((image.naturalHeight || image.height) * scale));
-        const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(image, 0, 0, width, height);
-        return await canvasToBlob(canvas, 'image/jpeg', 0.82);
-      } catch (err) {
-        console.warn('Image conversion skipped:', err);
-        return file;
-      } finally {
-        URL.revokeObjectURL(imageUrl);
-      }
-    }
     async function uploadToCloudinary(file) {
       const formData = new FormData();
       formData.append('file', file);
@@ -692,6 +637,9 @@
       const photosSnap = await getDocs(photosCollection);
       const allPhotos = photosSnap.docs.map(d => ({ id: d.id, ...d.data() }));
 
+      const tripsSnap = await getDocs(tripsCollection);
+      trips = tripsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+
       document.getElementById('statAlbumCount').textContent = albums.length;
       document.getElementById('statTotalCount').textContent = allPhotos.length;
       document.getElementById('statFavCount').textContent = allPhotos.filter(p => p.isFavorite).length;
@@ -706,8 +654,241 @@
       }
 
       renderAlbumsGrid(allPhotos);
+      renderTripsList();
     }
 
+    /* RENDER TRIPS LIST (PAST & UPCOMING) */
+    function renderTripsList() {
+      tripsListGrid.innerHTML = '';
+      const now = Date.now();
+
+      let filteredTrips = trips.filter(t => {
+        let isPast = false;
+        if (t.tripType === 'Overnight' && t.checkOutDate) {
+          isPast = new Date(t.checkOutDate).getTime() < now;
+        } else {
+          isPast = t.createdAt < (now - 86400000 * 2);
+        }
+        return currentTripTab === 'past' ? isPast : !isPast;
+      });
+
+      if (!filteredTrips.length) {
+        tripsEmptyState.classList.remove('hidden');
+        return;
+      }
+      tripsEmptyState.classList.add('hidden');
+
+      filteredTrips.forEach(trip => {
+        const card = document.createElement('article');
+        card.className = 'bg-white dark:bg-paper-900 border border-paper-200 dark:border-paper-800 rounded-3xl p-6 shadow-sm space-y-4 relative group';
+
+        let nightsText = '';
+        if (trip.tripType === 'Overnight') {
+          const days = (parseInt(trip.nights || 1) + 1);
+          nightsText = ` (${days} Days ${trip.nights} Nights)`;
+        }
+
+        // Group activities by Day
+        const activitiesByDay = {};
+        (trip.activities || []).forEach(act => {
+          const dayKey = act.day || 'Day 1';
+          if (!activitiesByDay[dayKey]) activitiesByDay[dayKey] = [];
+          activitiesByDay[dayKey].push(act);
+        });
+
+        let itineraryHtml = '';
+        const dayKeys = Object.keys(activitiesByDay).sort();
+
+        if (dayKeys.length > 0) {
+          dayKeys.forEach(day => {
+            itineraryHtml += `
+              <div class="space-y-1">
+                <span class="text-xs font-semibold uppercase tracking-wider text-terracotta-500">${day}:</span>
+                <ul class="list-disc list-inside text-xs text-paper-800/80 dark:text-paper-100/80 space-y-0.5">
+                  ${activitiesByDay[day].map(a => `<li><strong class="font-medium text-paper-800 dark:text-paper-100">${escapeHTML(a.location)}</strong> —${escapeHTML(a.activity)}</li>`).join('')}
+                </ul>
+              </div>
+            `;
+          });
+        } else {
+          itineraryHtml = `<p class="text-xs text-paper-800/40 dark:text-paper-100/40 italic">Tiada senarai aktiviti diisi.</p>`;
+        }
+
+        card.innerHTML = `
+          <div class="flex items-start justify-between">
+            <div>
+              <span class="text-[10px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full bg-terracotta-500/10 text-terracotta-600 dark:text-terracotta-400">
+                ${escapeHTML(trip.tripType)}
+              </span>
+              <h3 class="font-serif text-2xl font-semibold mt-2">${escapeHTML(trip.destination)}</h3>
+              <p class="text-xs text-paper-800/60 dark:text-paper-100/60 mt-0.5">
+                Trip Status: <span class="font-medium text-paper-800 dark:text-paper-100">${escapeHTML(trip.tripType)}${nightsText}</span>
+              </p>
+              ${trip.checkInDate ? `<p class="text-[11px] text-paper-800/50 dark:text-paper-100/50 font-mono mt-0.5">${trip.checkInDate} ➔${trip.checkOutDate}</p>` : ''}
+            </div>
+
+            <button class="btn-delete-trip text-rose-500/70 hover:text-rose-500 p-1.5 rounded-lg hover:bg-rose-500/10 transition-colors" title="Delete Trip">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+            </button>
+          </div>
+
+          <div class="border-t border-paper-100 dark:border-paper-800/80 pt-3 space-y-2">
+            <h4 class="text-xs font-semibold uppercase tracking-wider text-paper-800/50 dark:text-paper-100/50">Checklist & Itinerary:</h4>
+            ${itineraryHtml}
+          </div>
+        `;
+
+        card.querySelector('.btn-delete-trip').addEventListener('click', async () => {
+          if (confirm(`Padam trip "${trip.destination}"?`)) {
+            await deleteDoc(doc(firestore, 'trips', trip.id));
+            await loadData();
+          }
+        });
+
+        tripsListGrid.appendChild(card);
+      });
+    }
+
+    /* PENGENDALI TRIP TAB & FORM MODAL */
+    document.getElementById('tabUpcomingTrips').addEventListener('click', () => {
+      currentTripTab = 'upcoming';
+      document.getElementById('tabUpcomingTrips').className = 'px-4 py-1.5 rounded-lg text-xs font-semibold bg-white dark:bg-paper-800 shadow-sm transition-all';
+      document.getElementById('tabPastTrips').className = 'px-4 py-1.5 rounded-lg text-xs font-semibold text-paper-800/60 dark:text-paper-100/60 hover:text-paper-800 transition-all';
+      renderTripsList();
+    });
+
+    document.getElementById('tabPastTrips').addEventListener('click', () => {
+      currentTripTab = 'past';
+      document.getElementById('tabPastTrips').className = 'px-4 py-1.5 rounded-lg text-xs font-semibold bg-white dark:bg-paper-800 shadow-sm transition-all';
+      document.getElementById('tabUpcomingTrips').className = 'px-4 py-1.5 rounded-lg text-xs font-semibold text-paper-800/60 dark:text-paper-100/60 hover:text-paper-800 transition-all';
+      renderTripsList();
+    });
+
+    document.getElementById('btnOpenCreateTrip').addEventListener('click', () => {
+      resetTripForm();
+      createTripModal.showModal();
+    });
+    document.getElementById('closeCreateTripModal').addEventListener('click', () => createTripModal.close());
+    document.getElementById('cancelCreateTripBtn').addEventListener('click', () => createTripModal.close());
+
+    // Switch Day Trip vs Overnight
+    const tripTypeRadios = document.querySelectorAll('input[name="tripType"]');
+    const accommodationSection = document.getElementById('accommodationSection');
+
+    tripTypeRadios.forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        if (e.target.value === 'Overnight') {
+          accommodationSection.classList.remove('hidden');
+        } else {
+          accommodationSection.classList.add('hidden');
+        }
+      });
+    });
+
+    // Dynamic Activity Rows Generator
+    const activitiesContainer = document.getElementById('activitiesContainer');
+    document.getElementById('btnAddActivityRow').addEventListener('click', () => addActivityRow());
+
+function addActivityRow(location = '', activity = '', day = 'Day 1') {
+  const container = document.getElementById('activitiesContainer');
+  const row = document.createElement('div');
+
+  // Kad gaya moden dengan border halus dan butang delete di tepi
+  row.className = 'activity-row relative group bg-paper-50 dark:bg-paper-950 p-3 sm:p-2.5 rounded-2xl border border-paper-200 dark:border-paper-800/80 hover:border-terracotta-500/40 transition-all flex flex-col sm:flex-row gap-2 items-stretch sm:items-center pr-9 sm:pr-2.5';
+
+  row.innerHTML = `
+    <!-- Input Lokasi -->
+    <div class="flex-1">
+      <input type="text" placeholder="Lokasi / Tempat (cth: Pasar Malam)" value="${escapeHTML(location)}" class="act-location w-full px-3 py-2 rounded-xl bg-white dark:bg-paper-900 border border-paper-200 dark:border-paper-800 text-xs text-paper-800 dark:text-paper-100 placeholder:text-paper-400 focus:outline-none focus:border-terracotta-500 transition-all">
+    </div>
+
+    <!-- Input Aktiviti -->
+    <div class="flex-1">
+      <input type="text" placeholder="Aktiviti / Cadangan (cth: Beli makanan)" value="${escapeHTML(activity)}" class="act-activity w-full px-3 py-2 rounded-xl bg-white dark:bg-paper-900 border border-paper-200 dark:border-paper-800 text-xs text-paper-800 dark:text-paper-100 placeholder:text-paper-400 focus:outline-none focus:border-terracotta-500 transition-all">
+    </div>
+
+    <!-- Pilihan Hari -->
+    <div class="w-full sm:w-28">
+      <select class="act-day w-full px-3 py-2 rounded-xl bg-white dark:bg-paper-900 border border-paper-200 dark:border-paper-800 text-xs text-paper-800 dark:text-paper-100 focus:outline-none focus:border-terracotta-500 transition-all cursor-pointer">
+        <option value="Day 1" ${day === 'Day 1' ? 'selected' : ''}>Day 1</option>
+        <option value="Day 2" ${day === 'Day 2' ? 'selected' : ''}>Day 2</option>
+        <option value="Day 3" ${day === 'Day 3' ? 'selected' : ''}>Day 3</option>
+        <option value="Day 4" ${day === 'Day 4' ? 'selected' : ''}>Day 4</option>
+        <option value="Day 5" ${day === 'Day 5' ? 'selected' : ''}>Day 5</option>
+      </select>
+    </div>
+
+    <!-- Butang Buang / Delete -->
+    <button type="button" class="btn-remove-row absolute top-2.5 right-2.5 sm:static p-1.5 rounded-lg text-paper-400 hover:text-rose-500 hover:bg-rose-500/10 transition-all" title="Padam Aktiviti">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+    </button>
+  `;
+
+  // Fungsi padam baris apabila butang sampah/pangkah ditekan
+  row.querySelector('.btn-remove-row').addEventListener('click', () => {
+    row.classList.add('opacity-0', 'scale-95');
+    setTimeout(() => row.remove(), 150);
+  });
+
+  container.appendChild(row);
+}
+
+    function resetTripForm() {
+      document.getElementById('createTripForm').reset();
+      activitiesContainer.innerHTML = '';
+      accommodationSection.classList.add('hidden');
+      addActivityRow(); // Baris kosong disediakan supaya pengguna terus isi sendiri
+    }
+
+    // Submit Create Trip Form
+    document.getElementById('createTripForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const destination = document.getElementById('tripDestination').value.trim();
+      const tripType = document.querySelector('input[name="tripType"]:checked').value;
+      const nights = document.getElementById('tripNights').value;
+      const checkInDate = document.getElementById('checkInDate').value;
+      const checkOutDate = document.getElementById('checkOutDate').value;
+
+      if (!destination) return;
+
+      const actRows = activitiesContainer.querySelectorAll('.activity-row');
+      const activities = [];
+      actRows.forEach(r => {
+        const loc = r.querySelector('.act-location').value.trim();
+        const act = r.querySelector('.act-activity').value.trim();
+        const day = r.querySelector('.act-day').value;
+        if (loc || act) {
+          activities.push({ location: loc, activity: act, day });
+        }
+      });
+
+      const submitBtn = document.getElementById('submitCreateTripBtn');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Saving...';
+
+      try {
+        const tripId = createCustomId();
+        await setDoc(doc(firestore, 'trips', tripId), {
+          destination,
+          tripType,
+          nights: tripType === 'Overnight' ? nights : null,
+          checkInDate: tripType === 'Overnight' ? checkInDate : null,
+          checkOutDate: tripType === 'Overnight' ? checkOutDate : null,
+          activities,
+          createdAt: Date.now()
+        });
+
+        createTripModal.close();
+        await loadData();
+      } catch (err) {
+        alert('Gagal simpan trip: ' + err.message);
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Save Trip';
+      }
+    });
+
+    /* RENDER ALBUMS GRID & FUNCTIONS ASAL */
     function renderAlbumsGrid(allPhotos) {
       albumsGrid.innerHTML = '';
       if (!albums.length) {
@@ -836,20 +1017,6 @@
       });
     }
 
-
-    [cropAspectSelect, cropZoomRange, cropXRange, cropYRange].forEach(control => {
-      control.addEventListener('input', renderCropPreview);
-      control.addEventListener('change', renderCropPreview);
-    });
-
-    document.getElementById('closeCropModal').addEventListener('click', () => closeCropper(null));
-    document.getElementById('cancelCropBtn').addEventListener('click', () => closeCropper(null));
-    document.getElementById('skipCropBtn').addEventListener('click', () => closeCropper(null));
-    document.getElementById('applyCropBtn').addEventListener('click', async () => {
-      if (!cropState) return;
-      const blob = await canvasToBlob(cropCanvas, 'image/jpeg', 0.9);
-      closeCropper(blob);
-    });
     const createAlbumForm = document.getElementById('createAlbumForm');
 
     document.getElementById('navCreateAlbumBtn').addEventListener('click', () => createAlbumModal.showModal());
@@ -869,14 +1036,10 @@
 
       const submitBtn = document.getElementById('submitCreateAlbumBtn');
       submitBtn.disabled = true;
-      submitBtn.textContent = 'Preparing cover...';
+      submitBtn.textContent = 'Saving...';
 
       try {
-        const preparedCover = await prepareImageForUpload(coverFile, true, '1.333');
-        if (!preparedCover) throw new Error('Cover image tak valid.');
-        submitBtn.textContent = 'Uploading cover...';
-        const cloudinaryRes = await uploadToCloudinary(preparedCover);
-        submitBtn.textContent = 'Saving album...';
+        const cloudinaryRes = await uploadToCloudinary(coverFile);
         const albumId = createCustomId();
 
         await setDoc(doc(firestore, 'albums', albumId), {
@@ -908,18 +1071,11 @@
 
       const message = document.getElementById('uploadMessage').value.trim();
       const saveBtn = document.getElementById('savePhotosBtn');
-      const saveBtnOriginal = saveBtn.innerHTML;
       saveBtn.disabled = true;
-      saveBtn.classList.add('opacity-60', 'cursor-wait');
 
       try {
-        for (let i = 0; i < files.length; i++) {
-          const file = files[i];
-          saveBtn.textContent = `Preparing ${i + 1}/${files.length}...`;
-          const preparedFile = await prepareImageForUpload(file, true, 'original');
-          if (!preparedFile) continue;
-          saveBtn.textContent = `Uploading ${i + 1}/${files.length}...`;
-          const cloudRes = await uploadToCloudinary(preparedFile);
+        for (const file of files) {
+          const cloudRes = await uploadToCloudinary(file);
           const photoId = createCustomId();
 
           await setDoc(doc(firestore, 'photos', photoId), {
@@ -927,7 +1083,7 @@
             url: cloudRes.secure_url,
             message,
             createdAt: Date.now(),
-            size: preparedFile.size || file.size,
+            size: file.size,
             isFavorite: false
           });
         }
@@ -940,33 +1096,9 @@
         alert('Gagal upload gambar: ' + err.message);
       } finally {
         saveBtn.disabled = false;
-        saveBtn.classList.remove('opacity-60', 'cursor-wait');
-        saveBtn.innerHTML = saveBtnOriginal;
       }
     });
 
-    document.getElementById('btnEditAlbum').addEventListener('click', async () => {
-      if (!currentAlbum) return;
-      const title = prompt('Album title:', currentAlbum.title || '');
-      if (title === null) return;
-      const description = prompt('Description:', currentAlbum.description || '');
-      if (description === null) return;
-
-      const cleanTitle = title.trim();
-      const cleanDescription = description.trim();
-      if (!cleanTitle) return;
-
-      await updateDoc(doc(firestore, 'albums', currentAlbum.id), {
-        title: cleanTitle,
-        description: cleanDescription
-      });
-
-      currentAlbum.title = cleanTitle;
-      currentAlbum.description = cleanDescription;
-      document.getElementById('albumHeaderTitle').textContent = cleanTitle;
-      document.getElementById('albumHeaderDesc').textContent = cleanDescription || 'No description added.';
-      await loadData();
-    });
     document.getElementById('btnDeleteAlbum').addEventListener('click', async () => {
       if (!currentAlbum) return;
       if (confirm(`Padam album "${currentAlbum.title}"? Semua gambar di dalam album ni akan terpadam.`)) {
@@ -1003,41 +1135,13 @@
 
       modalDownloadBtn.href = photo.url;
       updateModalFavIcon(photo.isFavorite);
-      
-      // Reset caption edit UI
+
       captionDisplayContainer.classList.remove('hidden');
       captionEditContainer.classList.add('hidden');
 
       photoModal.showModal();
     }
 
-    document.getElementById('modalCropBtn').addEventListener('click', async () => {
-      const photo = lightboxList[activePhotoIndex];
-      if (!photo) return;
-      const cropBtn = document.getElementById('modalCropBtn');
-      cropBtn.disabled = true;
-      try {
-        const cropped = await openCropper(photo.url, 'original');
-        if (!cropped) return;
-        const uploaded = await uploadToCloudinary(cropped);
-        await updateDoc(doc(firestore, 'photos', photo.id), {
-          url: uploaded.secure_url,
-          cloudinaryPublicId: uploaded.public_id,
-          size: cropped.size
-        });
-        photo.url = uploaded.secure_url;
-        photo.size = cropped.size;
-        modalImage.src = uploaded.secure_url;
-        modalDownloadBtn.href = uploaded.secure_url;
-        await loadAlbumPhotos();
-        await loadData();
-      } catch (err) {
-        alert('Gagal crop gambar: ' + err.message);
-      } finally {
-        cropBtn.disabled = false;
-      }
-    });
-    /* Edit Caption Trigger */
     document.getElementById('modalEditBtn').addEventListener('click', () => {
       const photo = lightboxList[activePhotoIndex];
       if (!photo) return;
@@ -1048,13 +1152,11 @@
       editCaptionInput.focus();
     });
 
-    /* Cancel Edit */
     document.getElementById('btnCancelCaption').addEventListener('click', () => {
       captionDisplayContainer.classList.remove('hidden');
       captionEditContainer.classList.add('hidden');
     });
 
-    /* Save Edited Caption to Firestore */
     document.getElementById('btnSaveCaption').addEventListener('click', async () => {
       const photo = lightboxList[activePhotoIndex];
       if (!photo) return;
@@ -1065,10 +1167,10 @@
 
       try {
         await updateDoc(doc(firestore, 'photos', photo.id), { message: newMsg });
-        
+
         photo.message = newMsg;
         modalNote.textContent = newMsg ? `"${newMsg}"` : 'No caption attached.';
-        
+
         captionDisplayContainer.classList.remove('hidden');
         captionEditContainer.classList.add('hidden');
 
@@ -1112,9 +1214,6 @@
     });
 
     document.getElementById('modalCloseBtn').addEventListener('click', () => photoModal.close());
-    photoModal.addEventListener('click', (e) => {
-      if (e.target === photoModal) photoModal.close();
-    });
     document.getElementById('prevPhotoBtn').addEventListener('click', () => {
       activePhotoIndex = (activePhotoIndex - 1 + lightboxList.length) % lightboxList.length;
       openLightbox(activePhotoIndex, lightboxList);
@@ -1138,7 +1237,6 @@
       return String(str || '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
     }
 
-    /* PENGENDALI DARK MODE (PERSISTENT & SYSTEM PREFERENCE) */
     document.getElementById('themeToggleBtn').addEventListener('click', () => {
       const isDark = document.documentElement.classList.toggle('dark');
       localStorage.setItem('theme', isDark ? 'dark' : 'light');
