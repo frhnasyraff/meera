@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Farhan & Meera — Digital Gallery</title>
+  <title>Farhan & Meera — Digital Albums & Gallery</title>
   
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,6 +13,13 @@
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
+    // Semak tema tersimpan sebelum paparan dirender untuk elak flickering
+    if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+
     tailwind.config = {
       darkMode: 'class',
       theme: {
@@ -26,8 +33,10 @@
               50: '#FBF9F5',
               100: '#F5F0E6',
               200: '#EADFCF',
+              700: '#38322D',
               800: '#26221F',
               900: '#1A1715',
+              950: '#110F0E',
             },
             terracotta: {
               400: '#C88A70',
@@ -45,13 +54,11 @@
   </script>
 
   <style>
-    /* Custom Scrollbar */
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.03); }
     ::-webkit-scrollbar-thumb { background: rgba(178, 111, 84, 0.3); border-radius: 99px; }
     ::-webkit-scrollbar-thumb:hover { background: rgba(178, 111, 84, 0.6); }
 
-    /* Custom Subtle Grain Overlay */
     .bg-grain {
       background-image: radial-gradient(rgba(178, 111, 84, 0.08) 1px, transparent 1px),
                         radial-gradient(rgba(38, 34, 31, 0.04) 1px, transparent 1px);
@@ -59,7 +66,11 @@
       background-position: 0 0, 16px 16px;
     }
 
-    /* Masonry Layout CSS Column rules */
+    .dark .bg-grain {
+      background-image: radial-gradient(rgba(200, 138, 112, 0.1) 1px, transparent 1px),
+                        radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    }
+
     .masonry-cols {
       column-count: 1;
       column-gap: 1.5rem;
@@ -73,91 +84,84 @@
       margin-bottom: 1.5rem;
     }
 
-    /* Custom Transitions */
     .img-zoom {
       transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    .photo-card:hover .img-zoom {
+    .photo-card:hover .img-zoom, .album-card:hover .img-zoom {
       transform: scale(1.05);
     }
   </style>
 </head>
-<body class="bg-paper-50 dark:bg-paper-900 text-paper-800 dark:text-paper-100 font-sans min-h-screen selection:bg-terracotta-500 selection:text-white bg-grain transition-colors duration-300">
+<body class="bg-paper-50 dark:bg-paper-950 text-paper-800 dark:text-paper-100 font-sans min-h-screen selection:bg-terracotta-500 selection:text-white bg-grain transition-colors duration-300">
 
   <!-- Top Navigation Bar -->
-  <header class="sticky top-0 z-40 backdrop-blur-md bg-paper-50/80 dark:bg-paper-900/80 border-b border-paper-200/60 dark:border-paper-800/60 transition-colors">
+  <header class="sticky top-0 z-40 backdrop-blur-md bg-paper-50/80 dark:bg-paper-950/80 border-b border-paper-200/60 dark:border-paper-800/60 transition-colors">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-      <a href="#" class="flex items-center gap-3 group">
+      <a href="#" id="brandHomeLink" class="flex items-center gap-3 group">
         <span class="w-10 h-10 rounded-full bg-terracotta-500/10 dark:bg-terracotta-400/20 text-terracotta-600 dark:text-terracotta-400 flex items-center justify-center font-serif text-xl italic font-semibold group-hover:scale-105 transition-transform">
           F&M
         </span>
         <div>
-          <span class="font-serif text-xl sm:text-2xl tracking-tight font-medium block leading-tight">Farhan & Meera</span>
-          <span class="text-[10px] tracking-[0.25em] uppercase text-paper-800/50 dark:text-paper-100/50 font-semibold">Our little corner</span>
+          <span class="font-serif text-xl sm:text-2xl tracking-tight font-medium block leading-tight text-paper-800 dark:text-paper-100">Farhan & Meera</span>
+          <span class="text-[10px] tracking-[0.25em] uppercase text-paper-800/50 dark:text-paper-100/50 font-semibold">Our Memory Albums</span>
         </div>
       </a>
 
-      <!-- Quick Nav & Theme Toggle -->
       <div class="flex items-center gap-3">
         <button id="themeToggleBtn" type="button" class="p-2.5 rounded-full hover:bg-paper-200/50 dark:hover:bg-paper-800/50 text-paper-800/70 dark:text-paper-100/70 transition-colors" title="Toggle Theme">
-          <!-- Sun Icon -->
           <svg id="sunIcon" class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-          <!-- Moon Icon -->
           <svg id="moonIcon" class="w-5 h-5 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
         </button>
 
-        <a href="#upload-section" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-terracotta-500 hover:bg-terracotta-600 text-white text-xs sm:text-sm font-medium transition-all shadow-md shadow-terracotta-500/20 active:scale-95">
+        <button id="navCreateAlbumBtn" type="button" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-terracotta-500 hover:bg-terracotta-600 text-white text-xs sm:text-sm font-medium transition-all shadow-md shadow-terracotta-500/20 active:scale-95">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-          <span>Add Memories</span>
-        </a>
+          <span>Create Album</span>
+        </button>
       </div>
     </div>
   </header>
 
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-16">
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-12">
 
-    <!-- Hero Showcase Section -->
-    <section class="relative rounded-3xl overflow-hidden bg-gradient-to-br from-paper-100 via-paper-50 to-terracotta-500/5 dark:from-paper-800 dark:via-paper-900 dark:to-terracotta-500/10 border border-paper-200/80 dark:border-paper-800 p-8 sm:p-12 lg:p-16 shadow-sm">
+    <!-- Hero Section -->
+    <section class="relative rounded-3xl overflow-hidden bg-gradient-to-br from-paper-100 via-paper-50 to-terracotta-500/5 dark:from-paper-900 dark:via-paper-950 dark:to-terracotta-500/10 border border-paper-200/80 dark:border-paper-800 p-8 sm:p-12 lg:p-16 shadow-sm">
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-        <!-- Text & Intro -->
         <div class="lg:col-span-7 space-y-6">
           <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-terracotta-500/10 text-terracotta-600 dark:text-terracotta-400 text-xs font-semibold tracking-wider uppercase">
             <span class="w-1.5 h-1.5 rounded-full bg-terracotta-500 animate-pulse"></span>
-            Just us
+            Our Collection
           </div>
           <h1 class="font-serif text-4xl sm:text-6xl lg:text-7xl font-normal leading-[1.08] tracking-tight">
-            Our Little Moments <br>
-            <span class="italic font-normal text-terracotta-500 dark:text-terracotta-400">yang kita simpan</span>
+            Our Albums & <br>
+            <span class="italic font-normal text-terracotta-500 dark:text-terracotta-400">Sweet Memories</span>
           </h1>
           <p class="text-paper-800/70 dark:text-paper-100/70 text-base sm:text-lg max-w-xl font-light leading-relaxed">
-            Tempat simpan gambar, cerita random, and little moments kita. Upload je apa-apa yang rasa sweet, nanti semua stay dekat sini.
+            Buat album khas untuk trip, date night, or mana-mana moment comel. Tekan mana-mana album untuk tengok gambar kat dalam.
           </p>
 
-          <!-- Dynamic Stat Badges -->
           <div class="pt-4 grid grid-cols-3 gap-4 border-t border-paper-200/80 dark:border-paper-800 max-w-md">
             <div>
+              <span id="statAlbumCount" class="block font-serif text-2xl sm:text-3xl font-semibold">0</span>
+              <span class="text-xs text-paper-800/50 dark:text-paper-100/50 uppercase tracking-wider font-medium">Albums</span>
+            </div>
+            <div>
               <span id="statTotalCount" class="block font-serif text-2xl sm:text-3xl font-semibold">0</span>
-              <span class="text-xs text-paper-800/50 dark:text-paper-100/50 uppercase tracking-wider font-medium">Memories</span>
+              <span class="text-xs text-paper-800/50 dark:text-paper-100/50 uppercase tracking-wider font-medium">Photos</span>
             </div>
             <div>
               <span id="statFavCount" class="block font-serif text-2xl sm:text-3xl font-semibold">0</span>
               <span class="text-xs text-paper-800/50 dark:text-paper-100/50 uppercase tracking-wider font-medium">Favorites</span>
             </div>
-            <div>
-              <span id="statStorageSize" class="block font-serif text-2xl sm:text-3xl font-semibold">0 KB</span>
-              <span class="text-xs text-paper-800/50 dark:text-paper-100/50 uppercase tracking-wider font-medium">Cloudinary</span>
-            </div>
           </div>
         </div>
 
-        <!-- Dynamic Latest Memory Stack -->
         <div class="lg:col-span-5 relative flex justify-center lg:justify-end">
           <div class="relative w-full max-w-sm aspect-[4/5] rounded-2xl overflow-hidden shadow-2xl border-4 border-white dark:border-paper-800 rotate-1 hover:rotate-0 transition-transform duration-500 group">
-            <div id="heroFeaturedPlaceholder" class="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-paper-100 via-paper-50 to-terracotta-500/10 dark:from-paper-800 dark:via-paper-900 dark:to-terracotta-500/20"><span class="font-serif text-3xl italic text-paper-800/35 dark:text-paper-100/35">No photo yet</span></div>
+            <div id="heroFeaturedPlaceholder" class="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-paper-100 via-paper-50 to-terracotta-500/10 dark:from-paper-900 dark:via-paper-950 dark:to-terracotta-500/20"><span class="font-serif text-3xl italic text-paper-800/35 dark:text-paper-100/35">No Album Yet</span></div>
             <img id="heroFeaturedImg" src="" alt="Featured memory" class="hidden w-full h-full object-cover img-zoom">
-            <div class="absolute inset-0 bg-gradient-to-t from-paper-900/80 via-transparent to-transparent flex flex-col justify-end p-6 text-white opacity-90 group-hover:opacity-100 transition-opacity">
-              <span class="text-xs uppercase tracking-widest text-terracotta-400 font-semibold mb-1">Latest Memory</span>
-              <h2 id="heroFeaturedTitle" class="font-serif text-2xl italic font-normal leading-snug">Belum ada gambar lagi</h2>
+            <div class="absolute inset-0 bg-gradient-to-t from-paper-950/80 via-transparent to-transparent flex flex-col justify-end p-6 text-white opacity-90 group-hover:opacity-100 transition-opacity">
+              <span class="text-xs uppercase tracking-widest text-terracotta-400 font-semibold mb-1">Featured Album</span>
+              <h2 id="heroFeaturedTitle" class="font-serif text-2xl italic font-normal leading-snug">Buat album pertama</h2>
               <p id="heroFeaturedDate" class="text-xs text-white/70 mt-1 font-light"></p>
             </div>
           </div>
@@ -165,125 +169,126 @@
       </div>
     </section>
 
-    <!-- Drag & Drop Uploader Section -->
-    <section id="upload-section" class="scroll-mt-24">
-      <div class="bg-white/80 dark:bg-paper-800/80 backdrop-blur border border-paper-200 dark:border-paper-700/60 rounded-3xl p-6 sm:p-10 shadow-sm transition-all hover:shadow-md">
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-          <div>
-            <span class="text-xs tracking-widest uppercase font-semibold text-terracotta-500">Add Something Sweet</span>
-            <h2 class="font-serif text-2xl sm:text-3xl font-medium mt-1">Add photo + note</h2>
-          </div>
-          <p class="text-xs text-paper-800/50 dark:text-paper-100/50 max-w-sm">
-            Tulis sikit, upload gambar, settle. Nanti kita dua-dua boleh nampak dekat link yang sama.
-          </p>
+    <!-- VIEW 1: ALBUMS GALLERY PAGE -->
+    <section id="albumsViewSection" class="space-y-8">
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-paper-200/80 dark:border-paper-800 pb-6">
+        <div>
+          <p class="text-xs uppercase tracking-widest text-sage-500 font-semibold mb-1">Our Memory Collections</p>
+          <h2 class="font-serif text-3xl sm:text-5xl font-medium">Gallery Albums</h2>
         </div>
 
-        <form id="uploadForm" class="space-y-6">
-          <!-- Drop Area -->
-          <div id="dropZone" class="border-2 border-dashed border-paper-200 dark:border-paper-700 hover:border-terracotta-500/60 dark:hover:border-terracotta-400/60 rounded-2xl p-8 sm:p-10 text-center transition-all bg-paper-50/50 dark:bg-paper-900/30 cursor-pointer relative">
-            <input type="file" id="photoInput" multiple accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
-            
-            <div class="max-w-md mx-auto space-y-3 pointer-events-none">
-              <div class="w-14 h-14 mx-auto rounded-full bg-terracotta-500/10 dark:bg-terracotta-400/10 text-terracotta-500 flex items-center justify-center">
-                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-              </div>
-              <p class="text-sm sm:text-base font-medium">
-                Drop gambar sini, or <span class="text-terracotta-500 underline">click pilih</span>
-              </p>
-              <p id="fileCountBadge" class="text-xs text-paper-800/50 dark:text-paper-100/50">PNG, JPG, WEBP, GIF pun boleh</p>
-            </div>
-          </div>
+        <button id="btnCreateAlbumSection" type="button" class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-paper-800 dark:bg-paper-100 text-paper-50 dark:text-paper-900 text-sm font-semibold hover:bg-terracotta-500 dark:hover:bg-terracotta-400 dark:hover:text-white transition-all shadow-sm active:scale-95">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+          <span>Create New Album</span>
+        </button>
+      </div>
 
-          <!-- Metadata Inputs Grid -->
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="md:col-span-2 space-y-1">
-              <label for="uploadMessage" class="text-xs font-semibold uppercase tracking-wider text-paper-800/60 dark:text-paper-100/60">Caption / wish</label>
-              <input type="text" id="uploadMessage" placeholder="Contoh: this day was cute hehe" class="w-full px-4 py-3 rounded-xl bg-paper-50 dark:bg-paper-900 border border-paper-200 dark:border-paper-700 text-sm focus:outline-none focus:border-terracotta-500 transition-colors">
-            </div>
+      <div id="albumsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
 
-            <div class="space-y-1">
-              <label for="uploadTag" class="text-xs font-semibold uppercase tracking-wider text-paper-800/60 dark:text-paper-100/60">Category Tag</label>
-              <select id="uploadTag" class="w-full px-4 py-3 rounded-xl bg-paper-50 dark:bg-paper-900 border border-paper-200 dark:border-paper-700 text-sm focus:outline-none focus:border-terracotta-500 transition-colors">
-                <option value="Everyday">Everyday</option>
-                <option value="Travel">Travel</option>
-                <option value="Date Night">Date Night</option>
-                <option value="Celebrations">Celebrations</option>
-              </select>
-            </div>
-          </div>
-
-          <!-- Upload Submit Button -->
-          <div class="flex justify-end">
-            <button type="submit" id="savePhotosBtn" class="px-6 py-3 rounded-xl bg-paper-800 dark:bg-paper-100 text-paper-50 dark:text-paper-900 text-sm font-semibold hover:bg-terracotta-500 dark:hover:bg-terracotta-400 dark:hover:text-white transition-all shadow-sm active:scale-95 flex items-center gap-2">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-              <span>Save memory</span>
-            </button>
-          </div>
-        </form>
+      <div id="albumsEmptyState" class="hidden text-center py-20 bg-white/50 dark:bg-paper-900/40 rounded-3xl border border-dashed border-paper-200 dark:border-paper-800">
+        <svg class="w-12 h-12 mx-auto text-paper-800/30 dark:text-paper-100/30 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+        <h3 class="font-serif text-2xl font-medium mb-1">Belum ada album</h3>
+        <p class="text-xs text-paper-800/50 dark:text-paper-100/50 max-w-sm mx-auto mb-4">Mula dengan cipta album baru untuk simpan kenangan gambar anda.</p>
+        <button id="btnEmptyCreateAlbum" class="px-5 py-2.5 rounded-xl bg-terracotta-500 text-white text-xs font-semibold hover:bg-terracotta-600 transition-all">Create First Album</button>
       </div>
     </section>
 
-    <!-- Gallery Control Toolbar & Filters -->
-    <section id="gallery" class="space-y-8 scroll-mt-20">
-      <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-paper-200/80 dark:border-paper-800 pb-6">
-        <div>
-          <p class="text-xs uppercase tracking-widest text-sage-500 font-semibold mb-1">All the little things</p>
-          <h2 class="font-serif text-3xl sm:text-5xl font-medium">Our Wall</h2>
+    <!-- VIEW 2: SINGLE ALBUM DETAIL PAGE -->
+    <section id="albumDetailViewSection" class="hidden space-y-10">
+      
+      <div class="flex items-center justify-between border-b border-paper-200/80 dark:border-paper-800 pb-4">
+        <button id="btnBackToAlbums" type="button" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-paper-200/50 dark:bg-paper-900/80 hover:bg-paper-200 dark:hover:bg-paper-800 text-xs sm:text-sm font-medium transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+          <span>Back to All Albums</span>
+        </button>
+
+        <button id="btnDeleteAlbum" type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-rose-500 hover:bg-rose-500/10 text-xs font-semibold transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+          <span>Delete Album</span>
+        </button>
+      </div>
+
+      <div class="relative rounded-3xl overflow-hidden bg-paper-900 text-white p-8 sm:p-12 min-h-[220px] flex flex-col justify-end border border-paper-800">
+        <img id="albumHeaderCoverImg" class="absolute inset-0 w-full h-full object-cover opacity-40" src="" alt="Album Cover">
+        <div class="relative z-10 space-y-2">
+          <span id="albumHeaderTag" class="px-3 py-1 rounded-full bg-white/20 backdrop-blur text-[10px] uppercase font-semibold tracking-wider text-terracotta-400">Category</span>
+          <h1 id="albumHeaderTitle" class="font-serif text-3xl sm:text-5xl font-medium">Album Name</h1>
+          <p id="albumHeaderDesc" class="text-sm sm:text-base text-white/80 font-light max-w-2xl italic font-serif">Album description here...</p>
+          <div id="albumHeaderMeta" class="text-xs text-white/60 pt-2 font-mono">0 photos • Created on date</div>
+        </div>
+      </div>
+
+      <div class="bg-white/80 dark:bg-paper-900/80 backdrop-blur border border-paper-200 dark:border-paper-800 rounded-3xl p-6 sm:p-8 shadow-sm">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+          <div>
+            <span class="text-xs tracking-widest uppercase font-semibold text-terracotta-500 dark:text-terracotta-400">Add Memories To Album</span>
+            <h2 class="font-serif text-2xl font-medium mt-1">Upload Photo + Caption</h2>
+          </div>
+          <p class="text-xs text-paper-800/50 dark:text-paper-100/50 max-w-sm">
+            Gambar yang diupload dekat sini terus disimpan dalam album ini.
+          </p>
         </div>
 
-        <!-- Search & Layout Switchers -->
-        <div class="flex flex-wrap items-center gap-3">
-          <!-- Search input -->
-          <div class="relative min-w-[220px] flex-1 sm:flex-none">
-            <input type="text" id="searchInput" placeholder="Search memories..." class="w-full pl-9 pr-4 py-2.5 rounded-xl bg-white dark:bg-paper-800 border border-paper-200 dark:border-paper-700 text-xs sm:text-sm focus:outline-none focus:border-terracotta-500 transition-colors">
-            <svg class="w-4 h-4 absolute left-3 top-3 text-paper-800/40 dark:text-paper-100/40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        <form id="uploadToAlbumForm" class="space-y-6">
+          <div id="dropZone" class="border-2 border-dashed border-paper-200 dark:border-paper-800 hover:border-terracotta-500/60 dark:hover:border-terracotta-400/60 rounded-2xl p-6 text-center transition-all bg-paper-50/50 dark:bg-paper-950/50 cursor-pointer relative">
+            <input type="file" id="photoInput" multiple accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+            <div class="max-w-md mx-auto space-y-2 pointer-events-none">
+              <div class="w-10 h-10 mx-auto rounded-full bg-terracotta-500/10 text-terracotta-500 flex items-center justify-center">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+              </div>
+              <p class="text-xs sm:text-sm font-medium">
+                Drop gambar sini, or <span class="text-terracotta-500 dark:text-terracotta-400 underline">click pilih</span>
+              </p>
+              <p id="fileCountBadge" class="text-[11px] text-paper-800/50 dark:text-paper-100/50">PNG, JPG, WEBP, GIF</p>
+            </div>
           </div>
 
-          <!-- Sort Select -->
-          <select id="sortSelect" class="px-3 py-2.5 rounded-xl bg-white dark:bg-paper-800 border border-paper-200 dark:border-paper-700 text-xs sm:text-sm focus:outline-none focus:border-terracotta-500">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="md:col-span-2 space-y-1">
+              <label for="uploadMessage" class="text-xs font-semibold uppercase tracking-wider text-paper-800/60 dark:text-paper-100/60">Caption / Wish</label>
+              <input type="text" id="uploadMessage" placeholder="Contoh: time ni best giler hehee" class="w-full px-4 py-2.5 rounded-xl bg-paper-50 dark:bg-paper-950 border border-paper-200 dark:border-paper-800 text-sm focus:outline-none focus:border-terracotta-500 dark:focus:border-terracotta-400">
+            </div>
+
+            <div class="flex items-end">
+              <button type="submit" id="savePhotosBtn" class="w-full py-2.5 rounded-xl bg-paper-800 dark:bg-paper-100 text-paper-50 dark:text-paper-900 text-sm font-semibold hover:bg-terracotta-500 dark:hover:bg-terracotta-400 dark:hover:text-white transition-all flex items-center justify-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                <span>Upload to Album</span>
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pt-4 border-t border-paper-200/80 dark:border-paper-800">
+        <h3 class="font-serif text-2xl font-medium">Photos in this Album</h3>
+
+        <div class="flex flex-wrap items-center gap-3">
+          <input type="text" id="searchInput" placeholder="Search caption..." class="px-3 py-2 rounded-xl bg-white dark:bg-paper-900 border border-paper-200 dark:border-paper-800 text-xs focus:outline-none focus:border-terracotta-500 dark:focus:border-terracotta-400">
+
+          <select id="sortSelect" class="px-3 py-2 rounded-xl bg-white dark:bg-paper-900 border border-paper-200 dark:border-paper-800 text-xs focus:outline-none focus:border-terracotta-500 dark:focus:border-terracotta-400">
             <option value="newest">Newest First</option>
             <option value="oldest">Oldest First</option>
-            <option value="title">By Title</option>
           </select>
 
-          <!-- Layout Switcher Buttons -->
-          <div class="flex items-center bg-white dark:bg-paper-800 border border-paper-200 dark:border-paper-700 rounded-xl p-1">
-            <button type="button" id="btnLayoutMasonry" title="Masonry Layout" class="p-1.5 rounded-lg text-terracotta-500 bg-paper-100 dark:bg-paper-700 transition-colors">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v6a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+          <div class="flex items-center bg-white dark:bg-paper-900 border border-paper-200 dark:border-paper-800 rounded-xl p-1">
+            <button type="button" id="btnLayoutMasonry" title="Masonry" class="p-1.5 rounded-lg text-terracotta-500 bg-paper-100 dark:bg-paper-800">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v6a2 2 0 01-2 2h-2a2 2 0 01-2-2V6z"/></svg>
             </button>
-            <button type="button" id="btnLayoutGrid" title="Compact Grid Layout" class="p-1.5 rounded-lg text-paper-800/50 dark:text-paper-100/50 hover:text-paper-800 transition-colors">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+            <button type="button" id="btnLayoutGrid" title="Grid" class="p-1.5 rounded-lg text-paper-800/50 dark:text-paper-100/50">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6z"/></svg>
             </button>
-            <button type="button" id="btnLayoutList" title="Filmstrip View" class="p-1.5 rounded-lg text-paper-800/50 dark:text-paper-100/50 hover:text-paper-800 transition-colors">
+            <button type="button" id="btnLayoutList" title="Filmstrip" class="p-1.5 rounded-lg text-paper-800/50 dark:text-paper-100/50">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
             </button>
           </div>
         </div>
       </div>
 
-      <!-- Tag Filter Chips Bar -->
-      <div class="flex flex-wrap items-center gap-2" id="filterTagsBar">
-        <button data-tag="ALL" class="tag-chip active px-4 py-1.5 rounded-full text-xs font-medium bg-paper-800 text-white dark:bg-paper-100 dark:text-paper-900 transition-all">All Photos</button>
-        <button data-tag="FAV" class="tag-chip px-4 py-1.5 rounded-full text-xs font-medium bg-white dark:bg-paper-800 border border-paper-200 dark:border-paper-700 text-paper-800/70 dark:text-paper-100/70 hover:border-terracotta-500 transition-all flex items-center gap-1.5">
-          <svg class="w-3.5 h-3.5 text-rose-500 fill-rose-500" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-          Favorites
-        </button>
-        <button data-tag="Travel" class="tag-chip px-4 py-1.5 rounded-full text-xs font-medium bg-white dark:bg-paper-800 border border-paper-200 dark:border-paper-700 text-paper-800/70 dark:text-paper-100/70 hover:border-terracotta-500 transition-all">Travel</button>
-        <button data-tag="Date Night" class="tag-chip px-4 py-1.5 rounded-full text-xs font-medium bg-white dark:bg-paper-800 border border-paper-200 dark:border-paper-700 text-paper-800/70 dark:text-paper-100/70 hover:border-terracotta-500 transition-all">Date Night</button>
-        <button data-tag="Celebrations" class="tag-chip px-4 py-1.5 rounded-full text-xs font-medium bg-white dark:bg-paper-800 border border-paper-200 dark:border-paper-700 text-paper-800/70 dark:text-paper-100/70 hover:border-terracotta-500 transition-all">Celebrations</button>
-        <button data-tag="Everyday" class="tag-chip px-4 py-1.5 rounded-full text-xs font-medium bg-white dark:bg-paper-800 border border-paper-200 dark:border-paper-700 text-paper-800/70 dark:text-paper-100/70 hover:border-terracotta-500 transition-all">Everyday</button>
-      </div>
+      <div id="galleryContainer" class="masonry-cols transition-all duration-300"></div>
 
-      <!-- Main Photo Grid Container -->
-      <div id="galleryContainer" class="masonry-cols transition-all duration-300">
-        <!-- Photo Cards Render Dynamically Here -->
-      </div>
-
-      <!-- Empty State Indicator -->
-      <div id="emptyState" class="hidden text-center py-20 bg-white/50 dark:bg-paper-800/30 rounded-3xl border border-dashed border-paper-200 dark:border-paper-800">
-        <svg class="w-12 h-12 mx-auto text-paper-800/30 dark:text-paper-100/30 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-        <h3 class="font-serif text-2xl font-medium mb-1">Tak jumpa memory</h3>
-        <p class="text-xs text-paper-800/50 dark:text-paper-100/50 max-w-sm mx-auto">Try clearing your search query or uploading your first photo above.</p>
+      <div id="photosEmptyState" class="hidden text-center py-16 bg-white/50 dark:bg-paper-900/40 rounded-3xl border border-dashed border-paper-200 dark:border-paper-800">
+        <p class="font-serif text-xl font-medium mb-1">Belum ada gambar dalam album ni</p>
+        <p class="text-xs text-paper-800/50 dark:text-paper-100/50">Gunakan borang kat atas untuk upload gambar pertama.</p>
       </div>
     </section>
 
@@ -299,11 +304,56 @@
 
   </main>
 
+  <!-- CREATE NEW ALBUM DIALOG MODAL -->
+  <dialog id="createAlbumModal" class="bg-transparent backdrop:bg-paper-950/80 backdrop:backdrop-blur-sm p-0 max-w-lg w-full rounded-3xl border-0 focus:outline-none">
+    <div class="bg-white dark:bg-paper-900 text-paper-800 dark:text-paper-100 p-6 sm:p-8 rounded-3xl shadow-2xl border border-paper-200 dark:border-paper-800 space-y-6">
+      <div class="flex items-center justify-between border-b border-paper-200 dark:border-paper-800 pb-4">
+        <div>
+          <span class="text-[10px] tracking-widest uppercase font-semibold text-terracotta-500 dark:text-terracotta-400">New Memory Collection</span>
+          <h3 class="font-serif text-2xl font-medium">Create Album</h3>
+        </div>
+        <button id="closeCreateAlbumModal" type="button" class="p-2 rounded-full hover:bg-paper-100 dark:hover:bg-paper-800">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <form id="createAlbumForm" class="space-y-4">
+        <div class="space-y-1">
+          <label for="newAlbumTitle" class="text-xs font-semibold uppercase tracking-wider text-paper-800/60 dark:text-paper-100/60">Album Title *</label>
+          <input type="text" id="newAlbumTitle" required placeholder="e.g., Japan Trip 2026 / Date Night" class="w-full px-4 py-2.5 rounded-xl bg-paper-50 dark:bg-paper-950 border border-paper-200 dark:border-paper-800 text-sm focus:outline-none focus:border-terracotta-500 dark:focus:border-terracotta-400">
+        </div>
+
+        <div class="space-y-1">
+          <label for="newAlbumDesc" class="text-xs font-semibold uppercase tracking-wider text-paper-800/60 dark:text-paper-100/60">Description / Note</label>
+          <textarea id="newAlbumDesc" rows="2" placeholder="Write a small story or note..." class="w-full px-4 py-2.5 rounded-xl bg-paper-50 dark:bg-paper-950 border border-paper-200 dark:border-paper-800 text-sm focus:outline-none focus:border-terracotta-500 dark:focus:border-terracotta-400"></textarea>
+        </div>
+
+        <div class="space-y-1">
+          <label for="newAlbumTag" class="text-xs font-semibold uppercase tracking-wider text-paper-800/60 dark:text-paper-100/60">Category Tag</label>
+          <select id="newAlbumTag" class="w-full px-4 py-2.5 rounded-xl bg-paper-50 dark:bg-paper-950 border border-paper-200 dark:border-paper-800 text-sm focus:outline-none focus:border-terracotta-500 dark:focus:border-terracotta-400">
+            <option value="Travel">Travel</option>
+            <option value="Date Night">Date Night</option>
+            <option value="Celebrations">Celebrations</option>
+            <option value="Everyday">Everyday</option>
+          </select>
+        </div>
+
+        <div class="space-y-1">
+          <label for="albumCoverInput" class="text-xs font-semibold uppercase tracking-wider text-paper-800/60 dark:text-paper-100/60">Cover Photo *</label>
+          <input type="file" id="albumCoverInput" required accept="image/*" class="w-full text-xs text-paper-800/70 dark:text-paper-100/70 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-terracotta-500/10 dark:file:bg-terracotta-400/20 file:text-terracotta-600 dark:file:text-terracotta-400 hover:file:bg-terracotta-500/20 cursor-pointer">
+        </div>
+
+        <div class="pt-4 flex justify-end gap-3 border-t border-paper-200 dark:border-paper-800">
+          <button type="button" id="cancelCreateAlbumBtn" class="px-4 py-2 rounded-xl text-xs font-medium hover:bg-paper-100 dark:hover:bg-paper-800">Cancel</button>
+          <button type="submit" id="submitCreateAlbumBtn" class="px-5 py-2 rounded-xl bg-terracotta-500 hover:bg-terracotta-600 text-white text-xs font-semibold transition-all">Save Album</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
   <!-- Fullscreen Modal / Lightbox -->
-  <dialog id="photoModal" class="bg-transparent backdrop:bg-paper-900/90 backdrop:backdrop-blur-md p-0 max-w-none w-full h-full border-0 focus:outline-none">
+  <dialog id="photoModal" class="bg-transparent backdrop:bg-paper-950/90 backdrop:backdrop-blur-md p-0 max-w-none w-full h-full border-0 focus:outline-none">
     <div class="w-full h-full flex flex-col justify-between p-4 sm:p-8 text-white relative">
-      
-      <!-- Top Action Bar -->
       <div class="flex items-center justify-between z-20">
         <div class="flex items-center gap-3">
           <span id="modalTagBadge" class="px-3 py-1 rounded-full bg-white/10 backdrop-blur text-xs font-semibold uppercase tracking-wider text-terracotta-400">Category</span>
@@ -311,46 +361,57 @@
         </div>
 
         <div class="flex items-center gap-2">
-          <!-- Favorite Toggle Button -->
+          <!-- Edit Caption Button -->
+          <button id="modalEditBtn" type="button" class="p-2.5 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur transition-all" title="Edit Caption">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+          </button>
+
           <button id="modalFavBtn" type="button" class="p-2.5 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur transition-all" title="Toggle Favorite">
             <svg id="modalFavIcon" class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
           </button>
           
-          <!-- Download Button -->
           <a id="modalDownloadBtn" download="memory.jpg" class="p-2.5 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur transition-all" title="Download Image">
             <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
           </a>
 
-          <!-- Delete Button -->
           <button id="modalDeleteBtn" type="button" class="p-2.5 rounded-full bg-rose-500/20 hover:bg-rose-500/40 text-rose-300 backdrop-blur transition-all" title="Delete Memory">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
           </button>
 
-          <!-- Close Modal -->
           <button id="modalCloseBtn" type="button" class="p-2.5 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur transition-all ml-2" title="Close (Esc)">
             <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
           </button>
         </div>
       </div>
 
-      <!-- Center Image Preview with Next/Prev Arrow Controls -->
       <div class="relative flex-1 flex items-center justify-center my-4 overflow-hidden">
-        <button id="prevPhotoBtn" class="absolute left-0 sm:left-4 z-20 p-3 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur text-white transition-all" title="Previous (Left Arrow)">
+        <button id="prevPhotoBtn" class="absolute left-0 sm:left-4 z-20 p-3 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur text-white transition-all">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
         </button>
 
         <img id="modalImage" src="" alt="Full view memory" class="max-h-[75vh] max-w-full object-contain rounded-lg shadow-2xl transition-transform duration-300">
 
-        <button id="nextPhotoBtn" class="absolute right-0 sm:right-4 z-20 p-3 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur text-white transition-all" title="Next (Right Arrow)">
+        <button id="nextPhotoBtn" class="absolute right-0 sm:right-4 z-20 p-3 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur text-white transition-all">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
         </button>
       </div>
 
-      <!-- Bottom Details Footer -->
       <div class="max-w-3xl mx-auto w-full text-center space-y-2 bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/10">
-        <h3 id="modalTitle" class="font-serif text-2xl sm:text-3xl font-medium">Memory Name</h3>
-        <p id="modalNote" class="font-serif italic text-base sm:text-lg text-white/80">"Wish or note text will display here..."</p>
-        <p id="modalMetaInfo" class="text-[11px] text-white/50 uppercase tracking-widest pt-2">Size: 0 MB • ID: 1234</p>
+        <!-- Caption View Container -->
+        <div id="captionDisplayContainer" class="space-y-1">
+          <p id="modalNote" class="font-serif italic text-base sm:text-lg text-white">"Wish or note text..."</p>
+        </div>
+
+        <!-- Caption Edit Container (Hidden by default) -->
+        <div id="captionEditContainer" class="hidden flex flex-col sm:flex-row gap-2 max-w-lg mx-auto">
+          <input type="text" id="editCaptionInput" placeholder="Tulis caption baru..." class="flex-1 px-4 py-2 rounded-xl bg-black/50 border border-white/20 text-white text-sm focus:outline-none focus:border-terracotta-400">
+          <div class="flex gap-2 justify-center">
+            <button id="btnSaveCaption" type="button" class="px-4 py-2 rounded-xl bg-terracotta-500 hover:bg-terracotta-600 text-white text-xs font-semibold">Save</button>
+            <button id="btnCancelCaption" type="button" class="px-4 py-2 rounded-xl bg-white/20 hover:bg-white/30 text-white text-xs font-medium">Cancel</button>
+          </div>
+        </div>
+
+        <p id="modalMetaInfo" class="text-[11px] text-white/50 uppercase tracking-widest pt-2">Size info</p>
       </div>
     </div>
   </dialog>
@@ -362,7 +423,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
-    import { getFirestore, collection, getDocs, doc, setDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+    import { getFirestore, collection, getDocs, doc, setDoc, updateDoc, deleteDoc, query, where } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyD0d5vLa36td2zZQZOZgirtzFf987-YxQ0",
@@ -375,165 +436,55 @@
 
     const app = initializeApp(firebaseConfig);
     const firestore = getFirestore(app);
+    const albumsCollection = collection(firestore, 'albums');
     const photosCollection = collection(firestore, 'photos');
+
     const CLOUDINARY_CLOUD_NAME = 'dsxsq7wbi';
     const CLOUDINARY_UPLOAD_PRESET = 'meerpan';
 
-    /* Application Constants & Firebase Config */
-
-    // State Variables
-    let photos = [];
-    let currentLayout = 'masonry'; // 'masonry' | 'grid' | 'list'
-    let currentTagFilter = 'ALL';
+    let albums = [];
+    let currentAlbum = null;
+    let albumPhotos = [];
+    let currentLayout = 'masonry';
     let searchQuery = '';
     let currentSort = 'newest';
     let activePhotoIndex = -1;
-    let createdBlobUrls = [];
-    let heroBlobUrl = null; // Track active ObjectURLs for cleanup
+    let lightboxList = [];
 
-    // DOM Elements
+    const albumsViewSection = document.getElementById('albumsViewSection');
+    const albumDetailViewSection = document.getElementById('albumDetailViewSection');
+    const createAlbumModal = document.getElementById('createAlbumModal');
+
+    const albumsGrid = document.getElementById('albumsGrid');
+    const albumsEmptyState = document.getElementById('albumsEmptyState');
     const galleryContainer = document.getElementById('galleryContainer');
-    const emptyState = document.getElementById('emptyState');
+    const photosEmptyState = document.getElementById('photosEmptyState');
+
     const photoModal = document.getElementById('photoModal');
     const modalImage = document.getElementById('modalImage');
-    const modalTitle = document.getElementById('modalTitle');
     const modalNote = document.getElementById('modalNote');
     const modalMetaInfo = document.getElementById('modalMetaInfo');
     const modalTagBadge = document.getElementById('modalTagBadge');
     const modalDateText = document.getElementById('modalDateText');
-    const modalFavBtn = document.getElementById('modalFavBtn');
     const modalFavIcon = document.getElementById('modalFavIcon');
     const modalDownloadBtn = document.getElementById('modalDownloadBtn');
-    const photoInput = document.getElementById('photoInput');
-    const uploadForm = document.getElementById('uploadForm');
-    const uploadMessage = document.getElementById('uploadMessage');
-    const uploadTag = document.getElementById('uploadTag');
-    const fileCountBadge = document.getElementById('fileCountBadge');
-    const savePhotosBtn = document.getElementById('savePhotosBtn');
 
-    /* ==========================================================
-       1. CLOUDINARY ENGINE
-       ========================================================== */
-    function revokeActiveUrls() {
-      createdBlobUrls.forEach(url => URL.revokeObjectURL(url));
-      createdBlobUrls = [];
-    }
+    const captionDisplayContainer = document.getElementById('captionDisplayContainer');
+    const captionEditContainer = document.getElementById('captionEditContainer');
+    const editCaptionInput = document.getElementById('editCaptionInput');
 
-    function createTrackedUrl(blob) {
-      const url = URL.createObjectURL(blob);
-      createdBlobUrls.push(url);
-      return url;
-    }
-
-    function getPhotoSource(photo) {
-      if (!photo) return '';
-      if (photo.url) return photo.url;
-      if (photo.blob) {
-        try {
-          return createTrackedUrl(photo.blob);
-        } catch (err) {
-          console.warn('Could not create image URL:', err);
-        }
-      }
-      return '';
-    }
-
-    function getHeroPhotoSource(photo) {
-      if (!photo) return '';
-      if (photo.url) return photo.url;
-      if (photo.blob) {
-        try {
-          if (heroBlobUrl) URL.revokeObjectURL(heroBlobUrl);
-          heroBlobUrl = URL.createObjectURL(photo.blob);
-          return heroBlobUrl;
-        } catch (err) {
-          console.warn('Could not create hero image URL:', err);
-        }
-      }
-      return '';
-    }
-
-    function setImageOrPlaceholder(img, placeholder, src) {
-      if (!img) return;
-      img.onerror = () => {
-        img.classList.add('hidden');
-        if (placeholder) placeholder.classList.remove('hidden');
-        img.removeAttribute('src');
-      };
-
-      if (!src) {
-        img.classList.add('hidden');
-        if (placeholder) placeholder.classList.remove('hidden');
-        img.removeAttribute('src');
-        return;
-      }
-
-      if (placeholder) placeholder.classList.add('hidden');
-      img.classList.remove('hidden');
-      img.src = src;
-    }
-
-    async function fetchPhotosFromDB() {
-      const snapshot = await getDocs(photosCollection);
-      photos = snapshot.docs.map(photoDoc => ({ id: photoDoc.id, ...photoDoc.data() }));
-      updateAnalyticsAndFeatured();
-      renderGallery();
-    }
-
-
-    function createPhotoId() {
+    function createCustomId() {
       if (window.crypto && typeof window.crypto.randomUUID === 'function') {
         return window.crypto.randomUUID();
       }
-      return `photo-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      return `id-${Date.now()}-${Math.random().toString(36).slice(2)}`;
     }
 
-    function canvasToBlob(canvas, type, quality) {
-      return new Promise((resolve, reject) => {
-        canvas.toBlob(blob => {
-          if (blob) resolve(blob);
-          else reject(new Error('Could not prepare image for upload.'));
-        }, type, quality);
-      });
-    }
-
-    async function prepareImageForUpload(file) {
-      if (!file.type.startsWith('image/')) return null;
-      if (file.type === 'image/gif') return file;
-
-      const imageUrl = URL.createObjectURL(file);
-      const image = new Image();
-      image.decoding = 'async';
-
-      try {
-        await new Promise((resolve, reject) => {
-          image.onload = resolve;
-          image.onerror = () => reject(new Error('This image format is not supported by this browser. Try screenshot/save as JPG first.'));
-          image.src = imageUrl;
-        });
-
-        const maxSide = 1800;
-        const scale = Math.min(1, maxSide / Math.max(image.naturalWidth || image.width, image.naturalHeight || image.height));
-        const width = Math.max(1, Math.round((image.naturalWidth || image.width) * scale));
-        const height = Math.max(1, Math.round((image.naturalHeight || image.height) * scale));
-        const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(image, 0, 0, width, height);
-        return await canvasToBlob(canvas, 'image/jpeg', 0.82);
-      } catch (err) {
-        console.warn('Image conversion skipped:', err);
-        return file;
-      } finally {
-        URL.revokeObjectURL(imageUrl);
-      }
-    }
     async function uploadToCloudinary(file) {
       const formData = new FormData();
       formData.append('file', file);
       formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-      formData.append('folder', 'farhan-meera-gallery');
+      formData.append('folder', 'farhan-meera-albums');
 
       const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
         method: 'POST',
@@ -541,156 +492,155 @@
       });
 
       if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Cloudinary upload failed: ${errorText}`);
+        throw new Error('Cloudinary upload failed');
       }
-
       return response.json();
     }
-/* ==========================================================
-       2. ANALYTICS & HERO HIGHLIGHT ENGINE
-       ========================================================== */
-    function updateAnalyticsAndFeatured() {
-      // Total Photos
-      document.getElementById('statTotalCount').textContent = photos.length;
 
-      // Total Favorites
-      const favCount = photos.filter(p => p.isFavorite).length;
-      document.getElementById('statFavCount').textContent = favCount;
+    async function loadData() {
+      const albumsSnap = await getDocs(albumsCollection);
+      albums = albumsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
 
-      // Storage size calculation
-      const totalBytes = photos.reduce((acc, curr) => acc + (curr.size || 0), 0);
-      document.getElementById('statStorageSize').textContent = formatBytes(totalBytes);
+      const photosSnap = await getDocs(photosCollection);
+      const allPhotos = photosSnap.docs.map(d => ({ id: d.id, ...d.data() }));
 
-      // Featured highlight image
-      const featured = photos.find(p => p.isFavorite) || photos[0];
-      const heroImg = document.getElementById('heroFeaturedImg');
-      const heroPlaceholder = document.getElementById('heroFeaturedPlaceholder');
-      const heroTitle = document.getElementById('heroFeaturedTitle');
-      const heroDate = document.getElementById('heroFeaturedDate');
+      document.getElementById('statAlbumCount').textContent = albums.length;
+      document.getElementById('statTotalCount').textContent = allPhotos.length;
+      document.getElementById('statFavCount').textContent = allPhotos.filter(p => p.isFavorite).length;
 
-      setImageOrPlaceholder(heroImg, heroPlaceholder, getHeroPhotoSource(featured));
-
-      if (featured) {
-        heroTitle.textContent = featured.message || 'One of our little moments';
-        heroDate.textContent = formatDate(featured.createdAt);
-      } else {
-        heroTitle.textContent = 'Belum ada gambar lagi';
-        heroDate.textContent = 'Upload satu memory dulu';
+      if (albums.length > 0) {
+        const featured = albums[0];
+        document.getElementById('heroFeaturedImg').src = featured.coverUrl;
+        document.getElementById('heroFeaturedImg').classList.remove('hidden');
+        document.getElementById('heroFeaturedPlaceholder').classList.add('hidden');
+        document.getElementById('heroFeaturedTitle').textContent = featured.title;
+        document.getElementById('heroFeaturedDate').textContent = `${allPhotos.filter(p=>p.albumId===featured.id).length} photos`;
       }
+
+      renderAlbumsGrid(allPhotos);
     }
 
-    /* ==========================================================
-       3. GALLERY RENDERER & LAYOUT ENGINE
-       ========================================================== */
-    function getFilteredPhotos() {
-      return photos.filter(p => {
-        // Tag filter
-        if (currentTagFilter === 'FAV' && !p.isFavorite) return false;
-        if (currentTagFilter !== 'ALL' && currentTagFilter !== 'FAV' && p.tag !== currentTagFilter) return false;
+    function renderAlbumsGrid(allPhotos) {
+      albumsGrid.innerHTML = '';
+      if (!albums.length) {
+        albumsEmptyState.classList.remove('hidden');
+        return;
+      }
+      albumsEmptyState.classList.add('hidden');
 
-        // Search query filter
-        if (searchQuery.trim() !== '') {
-          const query = searchQuery.toLowerCase();
-          const matchName = (p.name || '').toLowerCase().includes(query);
-          const matchMsg = (p.message || '').toLowerCase().includes(query);
-          const matchTag = (p.tag || '').toLowerCase().includes(query);
-          if (!matchName && !matchMsg && !matchTag) return false;
-        }
+      albums.forEach(album => {
+        const pCount = allPhotos.filter(p => p.albumId === album.id).length;
+        const card = document.createElement('article');
+        card.className = 'album-card bg-white dark:bg-paper-900 border border-paper-200 dark:border-paper-800 rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-all group cursor-pointer';
+        card.innerHTML = `
+          <div class="relative aspect-[4/3] overflow-hidden bg-paper-100 dark:bg-paper-950">
+            <img src="${album.coverUrl}" alt="${escapeHTML(album.title)}" class="w-full h-full object-cover img-zoom">
+            <div class="absolute inset-0 bg-gradient-to-t from-paper-950/80 via-paper-950/20 to-transparent p-5 flex flex-col justify-end text-white">
+              <span class="text-[10px] font-semibold uppercase tracking-wider text-terracotta-400 mb-1">${escapeHTML(album.tag || 'Travel')}</span>
+              <h3 class="font-serif text-2xl font-medium leading-snug">${escapeHTML(album.title)}</h3>
+              <p class="text-xs text-white/70 line-clamp-1 italic font-serif mt-0.5">${escapeHTML(album.description || '')}</p>
+            </div>
+            <span class="absolute top-4 right-4 px-3 py-1 rounded-full bg-black/40 backdrop-blur text-white text-[10px] font-semibold">
+              ${pCount} photos
+            </span>
+          </div>
+        `;
 
-        return true;
-      }).sort((a, b) => {
-        if (currentSort === 'newest') return b.createdAt - a.createdAt;
-        if (currentSort === 'oldest') return a.createdAt - b.createdAt;
-        if (currentSort === 'title') return (a.name || '').localeCompare(b.name || '');
-        return 0;
+        card.addEventListener('click', () => openAlbumDetail(album.id));
+        albumsGrid.appendChild(card);
       });
     }
 
-    function renderGallery() {
-      revokeActiveUrls();
+    async function openAlbumDetail(albumId) {
+      currentAlbum = albums.find(a => a.id === albumId);
+      if (!currentAlbum) return;
+
+      albumsViewSection.classList.add('hidden');
+      albumDetailViewSection.classList.remove('hidden');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      document.getElementById('albumHeaderTitle').textContent = currentAlbum.title;
+      document.getElementById('albumHeaderDesc').textContent = currentAlbum.description || 'No description added.';
+      document.getElementById('albumHeaderTag').textContent = currentAlbum.tag || 'General';
+      document.getElementById('albumHeaderCoverImg').src = currentAlbum.coverUrl;
+
+      await loadAlbumPhotos();
+    }
+
+    async function loadAlbumPhotos() {
+      if (!currentAlbum) return;
+      const q = query(photosCollection, where('albumId', '==', currentAlbum.id));
+      const snap = await getDocs(q);
+      albumPhotos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+      document.getElementById('albumHeaderMeta').textContent = `${albumPhotos.length} photos • Created ${formatDate(currentAlbum.createdAt)}`;
+      renderAlbumPhotos();
+    }
+
+    function renderAlbumPhotos() {
       galleryContainer.innerHTML = '';
-      const displayPhotos = getFilteredPhotos();
 
-      if (displayPhotos.length === 0) {
-        emptyState.classList.remove('hidden');
+      let filtered = albumPhotos.filter(p => {
+        if (searchQuery.trim()) {
+          return (p.message || '').toLowerCase().includes(searchQuery.toLowerCase());
+        }
+        return true;
+      }).sort((a,b) => {
+        if (currentSort === 'newest') return b.createdAt - a.createdAt;
+        if (currentSort === 'oldest') return a.createdAt - b.createdAt;
+        return 0;
+      });
+
+      if (!filtered.length) {
+        photosEmptyState.classList.remove('hidden');
         return;
-      } else {
-        emptyState.classList.add('hidden');
       }
+      photosEmptyState.classList.add('hidden');
 
-      displayPhotos.forEach((photo) => {
-        const url = getPhotoSource(photo);
-        const safeName = escapeHTML(photo.message || 'Little memory');
-        const safeNote = escapeHTML(photo.message || '');
-        const tag = photo.tag || 'Everyday';
+      filtered.forEach(photo => {
+        const safeMsg = escapeHTML(photo.message || '');
         const isFav = !!photo.isFavorite;
 
         const card = document.createElement('article');
-        
         if (currentLayout === 'masonry') {
-          card.className = 'masonry-item photo-card bg-white dark:bg-paper-800 border border-paper-200 dark:border-paper-700/60 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all group cursor-pointer';
+          card.className = 'masonry-item photo-card bg-white dark:bg-paper-900 border border-paper-200 dark:border-paper-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all group cursor-pointer';
           card.innerHTML = `
-            <div class="relative overflow-hidden bg-paper-100 dark:bg-paper-900">
-              <img src="${url}" alt="${safeName}" class="w-full h-auto object-cover img-zoom" loading="lazy">
-              <div class="absolute inset-0 bg-gradient-to-t from-paper-900/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity p-4 flex flex-col justify-end">
-                <span class="text-[10px] font-semibold uppercase tracking-wider text-terracotta-400">${escapeHTML(tag)}</span>
-                <h4 class="font-serif text-lg text-white font-medium line-clamp-1">${safeName}</h4>
-              </div>
-              <button type="button" class="btn-fav absolute top-3 right-3 p-2 rounded-full backdrop-blur ${isFav ? 'bg-rose-500 text-white' : 'bg-black/30 text-white/80 hover:bg-black/50'} transition-all" title="Favorite">
+            <div class="relative overflow-hidden bg-paper-100 dark:bg-paper-950">
+              <img src="${photo.url}" alt="${safeMsg}" class="w-full h-auto object-cover img-zoom" loading="lazy">
+              <button type="button" class="btn-fav absolute top-3 right-3 p-2 rounded-full backdrop-blur ${isFav ? 'bg-rose-500 text-white' : 'bg-black/30 text-white/80 hover:bg-black/50'}" title="Favorite">
                 <svg class="w-4 h-4 ${isFav ? 'fill-current' : 'none'}" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
               </button>
             </div>
-            <div class="p-4 space-y-1">
-              <div class="flex items-center justify-between text-xs text-paper-800/50 dark:text-paper-100/50">
-                <span>${formatDate(photo.createdAt)}</span>
-                <span class="px-2 py-0.5 rounded-full bg-paper-100 dark:bg-paper-700 font-medium">${escapeHTML(tag)}</span>
-              </div>
-              <h3 class="font-serif text-lg font-medium text-paper-800 dark:text-paper-100 truncate">${safeName}</h3>
-              ${safeNote ? `<p class="text-xs text-paper-800/70 dark:text-paper-100/70 line-clamp-2 italic font-serif">"${safeNote}"</p>` : ''}
+            <div class="p-3 space-y-1">
+              <span class="text-[10px] text-paper-800/50 dark:text-paper-100/50">${formatDate(photo.createdAt)}</span>
+              ${safeMsg ? `<p class="text-xs text-paper-800/80 dark:text-paper-100/80 italic font-serif">"${safeMsg}"</p>` : ''}
             </div>
           `;
         } else if (currentLayout === 'grid') {
-          card.className = 'photo-card bg-white dark:bg-paper-800 border border-paper-200 dark:border-paper-700/60 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all group cursor-pointer';
+          card.className = 'photo-card bg-white dark:bg-paper-900 border border-paper-200 dark:border-paper-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all group cursor-pointer';
           card.innerHTML = `
-            <div class="relative aspect-square overflow-hidden bg-paper-100 dark:bg-paper-900">
-              <img src="${url}" alt="${safeName}" class="w-full h-full object-cover img-zoom" loading="lazy">
-              <button type="button" class="btn-fav absolute top-3 right-3 p-2 rounded-full backdrop-blur ${isFav ? 'bg-rose-500 text-white' : 'bg-black/30 text-white/80 hover:bg-black/50'} transition-all" title="Favorite">
-                <svg class="w-4 h-4 ${isFav ? 'fill-current' : 'none'}" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
-              </button>
-            </div>
-            <div class="p-3">
-              <h3 class="font-serif text-sm font-medium truncate">${safeName}</h3>
-              <span class="text-[10px] text-paper-800/50 dark:text-paper-100/50">${formatDate(photo.createdAt)}</span>
+            <div class="relative aspect-square overflow-hidden">
+              <img src="${photo.url}" alt="${safeMsg}" class="w-full h-full object-cover img-zoom">
             </div>
           `;
         } else {
-          // Filmstrip / List view
-          card.className = 'photo-card bg-white dark:bg-paper-800 border border-paper-200 dark:border-paper-700/60 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all p-4 flex items-center gap-4 cursor-pointer mb-4';
+          card.className = 'photo-card bg-white dark:bg-paper-900 border border-paper-200 dark:border-paper-800 rounded-2xl overflow-hidden p-3 flex items-center gap-4 cursor-pointer mb-3';
           card.innerHTML = `
-            <img src="${url}" alt="${safeName}" class="w-20 h-20 object-cover rounded-xl flex-shrink-0">
-            <div class="flex-1 min-w-0 space-y-1">
-              <div class="flex items-center gap-2">
-                <span class="text-[10px] px-2 py-0.5 rounded-full bg-paper-100 dark:bg-paper-700 font-medium">${escapeHTML(tag)}</span>
-                <span class="text-xs text-paper-800/50 dark:text-paper-100/50">${formatDate(photo.createdAt)}</span>
-              </div>
-              <h3 class="font-serif text-base font-medium truncate">${safeName}</h3>
-              ${safeNote ? `<p class="text-xs text-paper-800/70 dark:text-paper-100/70 italic font-serif truncate">"${safeNote}"</p>` : ''}
+            <img src="${photo.url}" class="w-16 h-16 object-cover rounded-xl flex-shrink-0">
+            <div class="flex-1 min-w-0">
+              <p class="text-xs font-serif italic text-paper-800 dark:text-paper-100">${safeMsg || 'Untitled memory'}</p>
+              <span class="text-[10px] text-paper-800/50 dark:text-paper-100/50">${formatDate(photo.createdAt)}</span>
             </div>
-            <button type="button" class="btn-fav p-2.5 rounded-full border border-paper-200 dark:border-paper-700 ${isFav ? 'text-rose-500 bg-rose-50 dark:bg-rose-950/30' : 'text-paper-800/40 dark:text-paper-100/40'} transition-all" title="Favorite">
-              <svg class="w-5 h-5 ${isFav ? 'fill-current' : 'none'}" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
-            </button>
           `;
         }
 
-        // Click Event listener to open modal Lightbox
         card.addEventListener('click', (e) => {
           if (e.target.closest('.btn-fav')) {
             e.stopPropagation();
             toggleFavorite(photo.id);
           } else {
-            const index = displayPhotos.findIndex(p => p.id === photo.id);
-            openLightbox(index, displayPhotos);
+            const index = filtered.findIndex(p => p.id === photo.id);
+            openLightbox(index, filtered);
           }
         });
 
@@ -698,34 +648,174 @@
       });
     }
 
-    /* ==========================================================
-       4. LIGHTBOX & MODAL SHOWCASE ENGINE
-       ========================================================== */
-    let currentLightboxList = [];
+    const createAlbumForm = document.getElementById('createAlbumForm');
 
+    document.getElementById('navCreateAlbumBtn').addEventListener('click', () => createAlbumModal.showModal());
+    document.getElementById('btnCreateAlbumSection').addEventListener('click', () => createAlbumModal.showModal());
+    document.getElementById('btnEmptyCreateAlbum').addEventListener('click', () => createAlbumModal.showModal());
+    document.getElementById('closeCreateAlbumModal').addEventListener('click', () => createAlbumModal.close());
+    document.getElementById('cancelCreateAlbumBtn').addEventListener('click', () => createAlbumModal.close());
+
+    createAlbumForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const title = document.getElementById('newAlbumTitle').value.trim();
+      const description = document.getElementById('newAlbumDesc').value.trim();
+      const tag = document.getElementById('newAlbumTag').value;
+      const coverFile = document.getElementById('albumCoverInput').files[0];
+
+      if (!title || !coverFile) return;
+
+      const submitBtn = document.getElementById('submitCreateAlbumBtn');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Saving...';
+
+      try {
+        const cloudinaryRes = await uploadToCloudinary(coverFile);
+        const albumId = createCustomId();
+
+        await setDoc(doc(firestore, 'albums', albumId), {
+          title,
+          description,
+          tag,
+          coverUrl: cloudinaryRes.secure_url,
+          createdAt: Date.now()
+        });
+
+        createAlbumForm.reset();
+        createAlbumModal.close();
+        await loadData();
+      } catch (err) {
+        alert('Gagal cipta album: ' + err.message);
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Save Album';
+      }
+    });
+
+    document.getElementById('uploadToAlbumForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!currentAlbum) return;
+
+      const photoInput = document.getElementById('photoInput');
+      const files = Array.from(photoInput.files || []);
+      if (!files.length) return;
+
+      const message = document.getElementById('uploadMessage').value.trim();
+      const saveBtn = document.getElementById('savePhotosBtn');
+      saveBtn.disabled = true;
+
+      try {
+        for (const file of files) {
+          const cloudRes = await uploadToCloudinary(file);
+          const photoId = createCustomId();
+
+          await setDoc(doc(firestore, 'photos', photoId), {
+            albumId: currentAlbum.id,
+            url: cloudRes.secure_url,
+            message,
+            createdAt: Date.now(),
+            size: file.size,
+            isFavorite: false
+          });
+        }
+
+        document.getElementById('uploadToAlbumForm').reset();
+        document.getElementById('fileCountBadge').textContent = 'PNG, JPG, WEBP, GIF';
+        await loadAlbumPhotos();
+        await loadData();
+      } catch (err) {
+        alert('Gagal upload gambar: ' + err.message);
+      } finally {
+        saveBtn.disabled = false;
+      }
+    });
+
+    document.getElementById('btnDeleteAlbum').addEventListener('click', async () => {
+      if (!currentAlbum) return;
+      if (confirm(`Padam album "${currentAlbum.title}"? Semua gambar di dalam album ni akan terpadam.`)) {
+        await deleteDoc(doc(firestore, 'albums', currentAlbum.id));
+        showAlbumsList();
+        await loadData();
+      }
+    });
+
+    function showAlbumsList() {
+      currentAlbum = null;
+      albumDetailViewSection.classList.add('hidden');
+      albumsViewSection.classList.remove('hidden');
+    }
+
+    document.getElementById('btnBackToAlbums').addEventListener('click', showAlbumsList);
+    document.getElementById('brandHomeLink').addEventListener('click', (e) => {
+      e.preventDefault();
+      showAlbumsList();
+    });
+
+    /* LIGHTBOX & CAPTION EDITING ENGINE */
     function openLightbox(index, list) {
-      currentLightboxList = list;
+      lightboxList = list;
       activePhotoIndex = index;
-      const photo = currentLightboxList[activePhotoIndex];
+      const photo = lightboxList[activePhotoIndex];
       if (!photo) return;
 
-      const url = getPhotoSource(photo);
-      modalImage.src = url;
-      modalTitle.textContent = photo.message || 'Our little memory';
-      modalNote.textContent = photo.message ? `"${photo.message}"` : 'No note attached to this memory.';
-      modalTagBadge.textContent = photo.tag || 'Everyday';
+      modalImage.src = photo.url;
+      modalNote.textContent = photo.message ? `"${photo.message}"` : 'No caption attached.';
+      modalTagBadge.textContent = currentAlbum ? currentAlbum.tag : 'Memory';
       modalDateText.textContent = formatDate(photo.createdAt);
-      modalMetaInfo.textContent = `Size: ${formatBytes(photo.size || 0)} • Type: ${photo.type || 'Image'}`;
+      modalMetaInfo.textContent = `Size: ${formatBytes(photo.size || 0)}`;
 
-      // Update Download link
-      modalDownloadBtn.href = url;
-      modalDownloadBtn.download = 'memory.jpg';
-
-      // Favorite state
+      modalDownloadBtn.href = photo.url;
       updateModalFavIcon(photo.isFavorite);
+      
+      // Reset caption edit UI
+      captionDisplayContainer.classList.remove('hidden');
+      captionEditContainer.classList.add('hidden');
 
       photoModal.showModal();
     }
+
+    /* Edit Caption Trigger */
+    document.getElementById('modalEditBtn').addEventListener('click', () => {
+      const photo = lightboxList[activePhotoIndex];
+      if (!photo) return;
+
+      editCaptionInput.value = photo.message || '';
+      captionDisplayContainer.classList.add('hidden');
+      captionEditContainer.classList.remove('hidden');
+      editCaptionInput.focus();
+    });
+
+    /* Cancel Edit */
+    document.getElementById('btnCancelCaption').addEventListener('click', () => {
+      captionDisplayContainer.classList.remove('hidden');
+      captionEditContainer.classList.add('hidden');
+    });
+
+    /* Save Edited Caption to Firestore */
+    document.getElementById('btnSaveCaption').addEventListener('click', async () => {
+      const photo = lightboxList[activePhotoIndex];
+      if (!photo) return;
+
+      const newMsg = editCaptionInput.value.trim();
+      const saveBtn = document.getElementById('btnSaveCaption');
+      saveBtn.textContent = '...';
+
+      try {
+        await updateDoc(doc(firestore, 'photos', photo.id), { message: newMsg });
+        
+        photo.message = newMsg;
+        modalNote.textContent = newMsg ? `"${newMsg}"` : 'No caption attached.';
+        
+        captionDisplayContainer.classList.remove('hidden');
+        captionEditContainer.classList.add('hidden');
+
+        await loadAlbumPhotos();
+      } catch (err) {
+        alert('Gagal kemaskini caption: ' + err.message);
+      } finally {
+        saveBtn.textContent = 'Save';
+      }
+    });
 
     function updateModalFavIcon(isFav) {
       if (isFav) {
@@ -738,235 +828,83 @@
     }
 
     async function toggleFavorite(id) {
-      const target = photos.find(p => p.id === id);
+      const target = albumPhotos.find(p => p.id === id);
       if (!target) return;
       target.isFavorite = !target.isFavorite;
 
       await updateDoc(doc(firestore, 'photos', id), { isFavorite: target.isFavorite });
-      if (photoModal.open && currentLightboxList[activePhotoIndex]?.id === id) {
+      if (photoModal.open && lightboxList[activePhotoIndex]?.id === id) {
         updateModalFavIcon(target.isFavorite);
       }
-      updateAnalyticsAndFeatured();
-      renderGallery();
+      renderAlbumPhotos();
     }
 
-    async function deleteActivePhoto() {
-      const activePhoto = currentLightboxList[activePhotoIndex];
+    document.getElementById('modalDeleteBtn').addEventListener('click', async () => {
+      const activePhoto = lightboxList[activePhotoIndex];
       if (!activePhoto) return;
-
       await deleteDoc(doc(firestore, 'photos', activePhoto.id));
       photoModal.close();
-      await fetchPhotosFromDB();
-    }
-
-    function navigateLightbox(dir) {
-      if (!currentLightboxList.length) return;
-      activePhotoIndex = (activePhotoIndex + dir + currentLightboxList.length) % currentLightboxList.length;
-      openLightbox(activePhotoIndex, currentLightboxList);
-    }
-
-    /* ==========================================================
-       5. UPLOAD & DRAG/DROP FILE HANDLERS
-       ========================================================== */
-    photoInput.addEventListener('change', (e) => {
-      const count = e.target.files.length;
-      fileCountBadge.textContent = count > 0 ? `${count} photo(s) ready to upload` : 'PNG, JPG, WEBP, GIF pun boleh';
+      await loadAlbumPhotos();
+      await loadData();
     });
 
-    uploadForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const files = Array.from(photoInput.files || []);
-      if (!files.length) return;
-
-      const message = uploadMessage.value.trim();
-      const tag = uploadTag.value;
-      savePhotosBtn.disabled = true;
-      savePhotosBtn.classList.add('opacity-60', 'cursor-wait');
-
-      try {
-        for (const file of files) {
-          if (!file.type.startsWith('image/')) continue;
-
-          const preparedFile = await prepareImageForUpload(file);
-          if (!preparedFile) continue;
-
-          const id = createPhotoId();
-          const cloudinaryResult = await uploadToCloudinary(preparedFile);
-          const url = cloudinaryResult.secure_url;
-
-          await setDoc(doc(firestore, 'photos', id), {
-            name: 'Memory',
-            type: preparedFile.type || file.type,
-            size: preparedFile.size || file.size,
-            createdAt: Date.now(),
-            message,
-            tag,
-            isFavorite: false,
-            cloudinaryPublicId: cloudinaryResult.public_id,
-            url
-          });
-        }
-
-        uploadForm.reset();
-        fileCountBadge.textContent = 'PNG, JPG, WEBP, GIF pun boleh';
-        await fetchPhotosFromDB();
-      } catch (err) {
-        console.error('Upload failed:', err);
-        alert(`Upload tak lepas lagi: ${err.message || 'unknown error'}`);
-      } finally {
-        savePhotosBtn.disabled = false;
-        savePhotosBtn.classList.remove('opacity-60', 'cursor-wait');
-      }
-    });
-    // Drag & Drop visual highlights
-    const dropZone = document.getElementById('dropZone');
-    ['dragenter', 'dragover'].forEach(eventName => {
-      dropZone.addEventListener(eventName, (e) => {
-        e.preventDefault();
-        dropZone.classList.add('border-terracotta-500', 'bg-terracotta-500/5');
-      });
-    });
-    ['dragleave', 'drop'].forEach(eventName => {
-      dropZone.addEventListener(eventName, (e) => {
-        e.preventDefault();
-        dropZone.classList.remove('border-terracotta-500', 'bg-terracotta-500/5');
-      });
-    });
-
-    /* ==========================================================
-       6. TOOLBAR FILTERS & CONTROLS
-       ========================================================== */
-    // Tag Filters
-    document.getElementById('filterTagsBar').addEventListener('click', (e) => {
-      const chip = e.target.closest('.tag-chip');
-      if (!chip) return;
-
-      document.querySelectorAll('.tag-chip').forEach(c => {
-        c.className = 'tag-chip px-4 py-1.5 rounded-full text-xs font-medium bg-white dark:bg-paper-800 border border-paper-200 dark:border-paper-700 text-paper-800/70 dark:text-paper-100/70 hover:border-terracotta-500 transition-all';
-      });
-      chip.className = 'tag-chip active px-4 py-1.5 rounded-full text-xs font-medium bg-paper-800 text-white dark:bg-paper-100 dark:text-paper-900 transition-all';
-
-      currentTagFilter = chip.dataset.tag;
-      renderGallery();
-    });
-
-    // Layout Switchers
-    const btnMasonry = document.getElementById('btnLayoutMasonry');
-    const btnGrid = document.getElementById('btnLayoutGrid');
-    const btnList = document.getElementById('btnLayoutList');
-
-    function updateLayoutButtons(activeBtn) {
-      [btnMasonry, btnGrid, btnList].forEach(btn => {
-        btn.className = 'p-1.5 rounded-lg text-paper-800/50 dark:text-paper-100/50 hover:text-paper-800 transition-colors';
-      });
-      activeBtn.className = 'p-1.5 rounded-lg text-terracotta-500 bg-paper-100 dark:bg-paper-700 transition-colors';
-    }
-
-    btnMasonry.addEventListener('click', () => {
-      currentLayout = 'masonry';
-      galleryContainer.className = 'masonry-cols transition-all duration-300';
-      updateLayoutButtons(btnMasonry);
-      renderGallery();
-    });
-
-    btnGrid.addEventListener('click', () => {
-      currentLayout = 'grid';
-      galleryContainer.className = 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 transition-all duration-300';
-      updateLayoutButtons(btnGrid);
-      renderGallery();
-    });
-
-    btnList.addEventListener('click', () => {
-      currentLayout = 'list';
-      galleryContainer.className = 'max-w-3xl mx-auto space-y-4 transition-all duration-300';
-      updateLayoutButtons(btnList);
-      renderGallery();
-    });
-
-    // Search and Sorting Event Listeners
-    document.getElementById('searchInput').addEventListener('input', (e) => {
-      searchQuery = e.target.value;
-      renderGallery();
-    });
-
-    document.getElementById('sortSelect').addEventListener('change', (e) => {
-      currentSort = e.target.value;
-      renderGallery();
-    });
-
-    // Modal Action listeners
     document.getElementById('modalCloseBtn').addEventListener('click', () => photoModal.close());
-    document.getElementById('prevPhotoBtn').addEventListener('click', () => navigateLightbox(-1));
-    document.getElementById('nextPhotoBtn').addEventListener('click', () => navigateLightbox(1));
-    document.getElementById('modalFavBtn').addEventListener('click', () => {
-      const photo = currentLightboxList[activePhotoIndex];
-      if (photo) toggleFavorite(photo.id);
+    document.getElementById('prevPhotoBtn').addEventListener('click', () => {
+      activePhotoIndex = (activePhotoIndex - 1 + lightboxList.length) % lightboxList.length;
+      openLightbox(activePhotoIndex, lightboxList);
     });
-    document.getElementById('modalDeleteBtn').addEventListener('click', deleteActivePhoto);
-
-    // Keyboard Lightbox Navigation
-    window.addEventListener('keydown', (e) => {
-      if (!photoModal.open) return;
-      if (e.key === 'ArrowLeft') navigateLightbox(-1);
-      if (e.key === 'ArrowRight') navigateLightbox(1);
+    document.getElementById('nextPhotoBtn').addEventListener('click', () => {
+      activePhotoIndex = (activePhotoIndex + 1) % lightboxList.length;
+      openLightbox(activePhotoIndex, lightboxList);
     });
 
-    // Dark/Light Theme Toggle Handler
-    document.getElementById('themeToggleBtn').addEventListener('click', () => {
-      document.documentElement.classList.toggle('dark');
-    });
-
-    /* ==========================================================
-       7. UTILITY FUNCTIONS
-       ========================================================== */
     function formatDate(ts) {
-      if (!ts) return 'Unknown date';
+      if (!ts) return '';
       return new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     }
 
     function formatBytes(bytes) {
-      if (bytes === 0) return '0 KB';
-      const k = 1024;
-      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-      const i = Math.floor(Math.log(bytes) / Math.log(k));
-      return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+      if (!bytes) return '0 KB';
+      return (bytes / 1024 < 1024) ? Math.round(bytes / 1024) + ' KB' : (bytes / (1024 * 1024)).toFixed(1) + ' MB';
     }
 
     function escapeHTML(str) {
-      return String(str || '').replace(/[&<>"']/g, char => ({
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#39;'
-      }[char]));
+      return String(str || '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
     }
 
-    /* Initialize Application */
-    window.onload = async () => {
-      try {
-        await fetchPhotosFromDB();
-      } catch (err) {
-        console.error('Firebase initialization failed:', err);
-        emptyState.classList.remove('hidden');
-      }
-    };
+    /* PENGENDALI DARK MODE (PERSISTENT & SYSTEM PREFERENCE) */
+    document.getElementById('themeToggleBtn').addEventListener('click', () => {
+      const isDark = document.documentElement.classList.toggle('dark');
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    });
+
+    document.getElementById('btnLayoutMasonry').addEventListener('click', () => {
+      currentLayout = 'masonry';
+      galleryContainer.className = 'masonry-cols transition-all duration-300';
+      renderAlbumPhotos();
+    });
+    document.getElementById('btnLayoutGrid').addEventListener('click', () => {
+      currentLayout = 'grid';
+      galleryContainer.className = 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 transition-all duration-300';
+      renderAlbumPhotos();
+    });
+    document.getElementById('btnLayoutList').addEventListener('click', () => {
+      currentLayout = 'list';
+      galleryContainer.className = 'max-w-2xl mx-auto space-y-3 transition-all duration-300';
+      renderAlbumPhotos();
+    });
+
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      searchQuery = e.target.value;
+      renderAlbumPhotos();
+    });
+
+    document.getElementById('sortSelect').addEventListener('change', (e) => {
+      currentSort = e.target.value;
+      renderAlbumPhotos();
+    });
+
+    window.onload = loadData;
   </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
