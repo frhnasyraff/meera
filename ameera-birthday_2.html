@@ -345,7 +345,7 @@
       <div class="flex items-center justify-between border-b border-paper-200 dark:border-paper-800 pb-4">
         <div>
           <span class="text-[10px] tracking-widest uppercase font-semibold text-terracotta-500 dark:text-terracotta-400">Travel Plan</span>
-          <h3 class="font-serif text-2xl font-medium">Create New Trip</h3>
+          <h3 id="tripModalTitle" class="font-serif text-2xl font-medium">Create New Trip</h3>
         </div>
         <button id="closeCreateTripModal" type="button" class="p-2 rounded-full hover:bg-paper-100 dark:hover:bg-paper-800">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -579,6 +579,7 @@
     let activePhotoIndex = -1;
     let lightboxList = [];
     let currentTripTab = 'upcoming';
+    let editingTripId = null;
 
     const albumsViewSection = document.getElementById('albumsViewSection');
     const albumDetailViewSection = document.getElementById('albumDetailViewSection');
@@ -727,9 +728,14 @@
               ${trip.checkInDate ? `<p class="text-[11px] text-paper-800/50 dark:text-paper-100/50 font-mono mt-0.5">${trip.checkInDate} ➔${trip.checkOutDate}</p>` : ''}
             </div>
 
-            <button class="btn-delete-trip text-rose-500/70 hover:text-rose-500 p-1.5 rounded-lg hover:bg-rose-500/10 transition-colors" title="Delete Trip">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-            </button>
+            <div class="flex items-center gap-1">
+              <button class="btn-edit-trip text-paper-800/50 dark:text-paper-100/50 hover:text-terracotta-500 p-1.5 rounded-lg hover:bg-terracotta-500/10 transition-colors" title="Edit Trip">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+              </button>
+              <button class="btn-delete-trip text-rose-500/70 hover:text-rose-500 p-1.5 rounded-lg hover:bg-rose-500/10 transition-colors" title="Delete Trip">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+              </button>
+            </div>
           </div>
 
           <div class="border-t border-paper-100 dark:border-paper-800/80 pt-3 space-y-2">
@@ -737,6 +743,8 @@
             ${itineraryHtml}
           </div>
         `;
+
+        card.querySelector('.btn-edit-trip').addEventListener('click', () => openTripEditor(trip));
 
         card.querySelector('.btn-delete-trip').addEventListener('click', async () => {
           if (confirm(`Padam trip "${trip.destination}"?`)) {
@@ -834,10 +842,29 @@ function addActivityRow(location = '', activity = '', day = 'Day 1') {
 }
 
     function resetTripForm() {
+      editingTripId = null;
+      document.getElementById('tripModalTitle').textContent = 'Create New Trip';
+      document.getElementById('submitCreateTripBtn').textContent = 'Save Trip';
       document.getElementById('createTripForm').reset();
       activitiesContainer.innerHTML = '';
       accommodationSection.classList.add('hidden');
       addActivityRow(); // Baris kosong disediakan supaya pengguna terus isi sendiri
+    }
+
+    function openTripEditor(trip) {
+      editingTripId = trip.id;
+      document.getElementById('tripModalTitle').textContent = 'Edit Trip';
+      document.getElementById('submitCreateTripBtn').textContent = 'Update Trip';
+      document.getElementById('tripDestination').value = trip.destination || '';
+      document.querySelector(`input[name="tripType"][value="${trip.tripType || 'Day Trip'}"]`).checked = true;
+      document.getElementById('tripNights').value = trip.nights || '1';
+      document.getElementById('checkInDate').value = trip.checkInDate || '';
+      document.getElementById('checkOutDate').value = trip.checkOutDate || '';
+      accommodationSection.classList.toggle('hidden', trip.tripType !== 'Overnight');
+      activitiesContainer.innerHTML = '';
+      const activities = trip.activities && trip.activities.length ? trip.activities : [{ location: '', activity: '', day: 'Day 1' }];
+      activities.forEach(item => addActivityRow(item.location || '', item.activity || '', item.day || 'Day 1'));
+      createTripModal.showModal();
     }
 
     // Submit Create Trip Form
@@ -867,16 +894,25 @@ function addActivityRow(location = '', activity = '', day = 'Day 1') {
       submitBtn.textContent = 'Saving...';
 
       try {
-        const tripId = createCustomId();
-        await setDoc(doc(firestore, 'trips', tripId), {
+        const tripPayload = {
           destination,
           tripType,
           nights: tripType === 'Overnight' ? nights : null,
           checkInDate: tripType === 'Overnight' ? checkInDate : null,
           checkOutDate: tripType === 'Overnight' ? checkOutDate : null,
           activities,
-          createdAt: Date.now()
-        });
+          updatedAt: Date.now()
+        };
+
+        if (editingTripId) {
+          await updateDoc(doc(firestore, 'trips', editingTripId), tripPayload);
+        } else {
+          const tripId = createCustomId();
+          await setDoc(doc(firestore, 'trips', tripId), {
+            ...tripPayload,
+            createdAt: Date.now()
+          });
+        }
 
         createTripModal.close();
         await loadData();
