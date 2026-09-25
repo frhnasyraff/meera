@@ -233,10 +233,11 @@
               </button>
             </div>
           </div>
-          <div class="grid grid-cols-7 gap-1 text-center text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-paper-800/45 dark:text-paper-100/45">
+          <div class="hidden sm:grid grid-cols-7 gap-1 text-center text-xs font-semibold uppercase tracking-wider text-paper-800/45 dark:text-paper-100/45">
             <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
           </div>
-          <div id="tripCalendarGrid" class="grid grid-cols-7 gap-1 sm:gap-2"></div>
+          <div id="tripCalendarGrid" class="hidden sm:grid grid-cols-7 gap-2"></div>
+          <div id="tripAgendaList" class="sm:hidden space-y-2"></div>
           <p class="text-[11px] text-paper-800/45 dark:text-paper-100/45">Trip yang ada date akan appear dekat calendar ni.</p>
         </div>
 
@@ -428,11 +429,39 @@
           </div>
         </div>
 
-<!-- 3. Activity Wishlist -->
+        <!-- 3. Budget & Memory Link -->
+        <div class="space-y-4 bg-paper-50/50 dark:bg-paper-950/50 p-4 rounded-2xl border border-paper-200/60 dark:border-paper-800">
+          <h4 class="font-serif text-lg font-semibold text-terracotta-600 dark:text-terracotta-400 border-b border-paper-200/60 dark:border-paper-800 pb-1">3. Budget & Memory Link</h4>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div class="space-y-1">
+              <label for="budgetFuel" class="text-[10px] font-semibold uppercase tracking-wider text-paper-800/60 dark:text-paper-100/60">Minyak</label>
+              <input type="number" id="budgetFuel" min="0" step="1" placeholder="0" class="w-full px-3 py-2 rounded-xl bg-white dark:bg-paper-900 border border-paper-200 dark:border-paper-800 text-xs focus:outline-none focus:border-terracotta-500">
+            </div>
+            <div class="space-y-1">
+              <label for="budgetToll" class="text-[10px] font-semibold uppercase tracking-wider text-paper-800/60 dark:text-paper-100/60">Tol</label>
+              <input type="number" id="budgetToll" min="0" step="1" placeholder="0" class="w-full px-3 py-2 rounded-xl bg-white dark:bg-paper-900 border border-paper-200 dark:border-paper-800 text-xs focus:outline-none focus:border-terracotta-500">
+            </div>
+            <div class="space-y-1">
+              <label for="budgetFood" class="text-[10px] font-semibold uppercase tracking-wider text-paper-800/60 dark:text-paper-100/60">Makan</label>
+              <input type="number" id="budgetFood" min="0" step="1" placeholder="0" class="w-full px-3 py-2 rounded-xl bg-white dark:bg-paper-900 border border-paper-200 dark:border-paper-800 text-xs focus:outline-none focus:border-terracotta-500">
+            </div>
+            <div class="space-y-1">
+              <label for="budgetHotel" class="text-[10px] font-semibold uppercase tracking-wider text-paper-800/60 dark:text-paper-100/60">Hotel</label>
+              <input type="number" id="budgetHotel" min="0" step="1" placeholder="0" class="w-full px-3 py-2 rounded-xl bg-white dark:bg-paper-900 border border-paper-200 dark:border-paper-800 text-xs focus:outline-none focus:border-terracotta-500">
+            </div>
+          </div>
+          <div class="space-y-1">
+            <label for="tripAlbumLink" class="text-xs font-semibold uppercase tracking-wider text-paper-800/60 dark:text-paper-100/60">Memory Album Lepas Trip</label>
+            <select id="tripAlbumLink" class="w-full px-4 py-2 rounded-xl bg-white dark:bg-paper-900 border border-paper-200 dark:border-paper-800 text-sm focus:outline-none focus:border-terracotta-500">
+              <option value="">No album linked yet</option>
+            </select>
+          </div>
+        </div>
+<!-- 4. Activity Wishlist -->
 <div class="space-y-3 pt-2">
   <div class="flex items-center justify-between border-b border-paper-200 dark:border-paper-800 pb-2">
     <div class="flex items-center gap-2">
-      <span class="font-serif text-base sm:text-lg font-semibold text-terracotta-500">3.</span>
+      <span class="font-serif text-base sm:text-lg font-semibold text-terracotta-500">4.</span>
       <h4 class="font-serif text-base sm:text-lg font-semibold">Activity & Location Wishlist</h4>
     </div>
     <button id="btnAddActivityRow" type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-terracotta-500/10 hover:bg-terracotta-500/20 text-terracotta-500 text-xs font-semibold transition-all active:scale-95">
@@ -616,6 +645,7 @@
     const tripsEmptyState = document.getElementById('tripsEmptyState');
     const tripCalendarTitle = document.getElementById('tripCalendarTitle');
     const tripCalendarGrid = document.getElementById('tripCalendarGrid');
+    const tripAgendaList = document.getElementById('tripAgendaList');
 
     const galleryContainer = document.getElementById('galleryContainer');
     const photosEmptyState = document.getElementById('photosEmptyState');
@@ -728,6 +758,7 @@
 
     function renderTripCalendar() {
       tripCalendarGrid.innerHTML = '';
+      tripAgendaList.innerHTML = '';
       const cursor = new Date(tripCalendarCursor.getFullYear(), tripCalendarCursor.getMonth(), 1);
       const todayKey = toDateKey(new Date());
       const monthName = cursor.toLocaleDateString('en-MY', { month: 'long', year: 'numeric' });
@@ -737,6 +768,32 @@
       const daysInMonth = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 0).getDate();
       const totalCells = Math.ceil((firstDay + daysInMonth) / 7) * 7;
       const upcomingTrips = trips.filter(trip => !isTripPast(trip));
+      const agendaTrips = upcomingTrips
+        .map(trip => ({ trip, date: getTripStartDate(trip) }))
+        .filter(item => item.date)
+        .sort((a, b) => a.date - b.date)
+        .slice(0, 8);
+
+      if (agendaTrips.length) {
+        agendaTrips.forEach(({ trip, date }) => {
+          const item = document.createElement('button');
+          item.type = 'button';
+          item.className = 'w-full flex items-center justify-between gap-3 rounded-2xl border border-paper-200 dark:border-paper-800 bg-paper-50/70 dark:bg-paper-950/70 p-3 text-left active:scale-[0.99] transition-all';
+          const dateLabel = date.toLocaleDateString('en-MY', { month: 'short', day: 'numeric' });
+          const typeTone = trip.tripType === 'Overnight' ? 'bg-sage-500/12 text-sage-600 dark:text-sage-300' : 'bg-terracotta-500/12 text-terracotta-600 dark:text-terracotta-300';
+          item.innerHTML = `
+            <div class="min-w-0">
+              <p class="text-[11px] font-semibold uppercase tracking-wider text-paper-800/45 dark:text-paper-100/45">${dateLabel}</p>
+              <p class="font-serif text-lg leading-tight truncate">${escapeHTML(trip.destination)}</p>
+            </div>
+            <span class="shrink-0 px-2.5 py-1 rounded-full text-[10px] font-semibold ${typeTone}">${escapeHTML(trip.tripType)}</span>
+          `;
+          item.addEventListener('click', () => openTripEditor(trip));
+          tripAgendaList.appendChild(item);
+        });
+      } else {
+        tripAgendaList.innerHTML = '<div class="rounded-2xl border border-dashed border-paper-200 dark:border-paper-800 p-4 text-center text-xs text-paper-800/45 dark:text-paper-100/45">Belum ada upcoming trip yang ada date.</div>';
+      }
 
       for (let i = 0; i < totalCells; i++) {
         const dayNumber = i - firstDay + 1;
@@ -761,7 +818,7 @@
             ${dayTrips.length ? `<span class="text-[10px] font-semibold text-terracotta-500">${dayTrips.length}</span>` : ''}
           </div>
           <div class="space-y-1">
-            ${dayTrips.slice(0, 2).map(trip => `<button type="button" class="calendar-trip w-full text-left px-2 py-1 rounded-lg bg-white dark:bg-paper-900 border border-terracotta-500/20 text-[10px] sm:text-xs leading-tight text-paper-800 dark:text-paper-100 truncate" data-trip-id="${trip.id}">${escapeHTML(trip.destination)}</button>`).join('')}
+            ${dayTrips.slice(0, 2).map(trip => { const tone = trip.tripType === 'Overnight' ? 'border-sage-500/30 bg-sage-500/10' : 'border-terracotta-500/30 bg-terracotta-500/10'; return `<button type="button" class="calendar-trip w-full text-left px-2 py-1 rounded-lg border ${tone} text-[10px] sm:text-xs leading-tight text-paper-800 dark:text-paper-100 truncate" data-trip-id="${trip.id}">${escapeHTML(trip.destination)}</button>`; }).join('')}
             ${dayTrips.length > 2 ? `<p class="text-[10px] text-paper-800/45 dark:text-paper-100/45 px-1">+${dayTrips.length - 2} more</p>` : ''}
           </div>
         `;
@@ -776,6 +833,44 @@
       }
     }
     /* RENDER TRIPS LIST (PAST & UPCOMING) */
+    function moneyValue(id) {
+      const value = parseFloat(document.getElementById(id).value || '0');
+      return Number.isFinite(value) && value > 0 ? value : 0;
+    }
+
+    function getTripBudgetTotal(trip) {
+      const budget = trip.budget || {};
+      return ['fuel', 'toll', 'food', 'hotel'].reduce((total, key) => total + (parseFloat(budget[key]) || 0), 0);
+    }
+
+    function getTripCountdownText(trip) {
+      const start = getTripStartDate(trip);
+      if (!start) return '';
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      start.setHours(0, 0, 0, 0);
+      const diffDays = Math.round((start.getTime() - today.getTime()) / 86400000);
+      if (diffDays > 1) return `${diffDays} days to go`;
+      if (diffDays === 1) return 'Tomorrow';
+      if (diffDays === 0) return 'Today';
+      return '';
+    }
+
+    function getLinkedAlbum(trip) {
+      return albums.find(album => album.id === trip.linkedAlbumId) || null;
+    }
+
+    function populateTripAlbumSelect(selectedId = '') {
+      const select = document.getElementById('tripAlbumLink');
+      select.innerHTML = '<option value="">No album linked yet</option>';
+      albums.forEach(album => {
+        const option = document.createElement('option');
+        option.value = album.id;
+        option.textContent = album.title;
+        option.selected = album.id === selectedId;
+        select.appendChild(option);
+      });
+    }
     function renderTripsList() {
       tripsListGrid.innerHTML = '';
       const now = Date.now();
@@ -803,6 +898,12 @@
         const tripDateText = trip.checkInDate
           ? (trip.tripType === 'Overnight' && trip.checkOutDate ? `${trip.checkInDate} ➔ ${trip.checkOutDate}` : trip.checkInDate)
           : '';
+        const typeTone = trip.tripType === 'Overnight'
+          ? 'bg-sage-500/10 text-sage-600 dark:text-sage-300'
+          : 'bg-terracotta-500/10 text-terracotta-600 dark:text-terracotta-300';
+        const countdownText = getTripCountdownText(trip);
+        const budgetTotal = getTripBudgetTotal(trip);
+        const linkedAlbum = getLinkedAlbum(trip);
 
         // Group activities by Day
         const activitiesByDay = {};
@@ -833,14 +934,15 @@
         card.innerHTML = `
           <div class="flex items-start justify-between">
             <div>
-              <span class="text-[10px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full bg-terracotta-500/10 text-terracotta-600 dark:text-terracotta-400">
+              <span class="text-[10px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full ${typeTone}">
                 ${escapeHTML(trip.tripType)}
               </span>
               <h3 class="font-serif text-2xl font-semibold mt-2">${escapeHTML(trip.destination)}</h3>
               <p class="text-xs text-paper-800/60 dark:text-paper-100/60 mt-0.5">
                 Trip Status: <span class="font-medium text-paper-800 dark:text-paper-100">${escapeHTML(trip.tripType)}${nightsText}</span>
               </p>
-              ${tripDateText ? `<p class="text-[11px] text-paper-800/50 dark:text-paper-100/50 font-mono mt-0.5">${tripDateText}</p>` : ''}
+                            ${tripDateText ? `<p class="text-[11px] text-paper-800/50 dark:text-paper-100/50 font-mono mt-0.5">${tripDateText}</p>` : ''}
+              ${countdownText ? `<p class="inline-flex mt-2 px-2.5 py-1 rounded-full bg-paper-100 dark:bg-paper-950 text-[10px] font-semibold text-paper-800/60 dark:text-paper-100/60">${countdownText}</p>` : ''}
             </div>
 
             <div class="flex items-center gap-1">
@@ -853,11 +955,27 @@
             </div>
           </div>
 
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 border-t border-paper-100 dark:border-paper-800/80 pt-3">
+            <div class="rounded-2xl bg-paper-50 dark:bg-paper-950 p-3">
+              <p class="text-[10px] uppercase tracking-wider font-semibold text-paper-800/45 dark:text-paper-100/45">Budget Estimate</p>
+              <p class="font-serif text-xl">${budgetTotal ? `RM ${budgetTotal.toFixed(0)}` : 'Not set'}</p>
+            </div>
+            <div class="rounded-2xl bg-paper-50 dark:bg-paper-950 p-3">
+              <p class="text-[10px] uppercase tracking-wider font-semibold text-paper-800/45 dark:text-paper-100/45">Memory Album</p>
+              ${linkedAlbum ? `<button type="button" class="btn-open-linked-album text-sm font-medium truncate text-left text-terracotta-600 dark:text-terracotta-300 hover:underline" data-album-id="${linkedAlbum.id}">${escapeHTML(linkedAlbum.title)}</button>` : `<p class="text-sm font-medium truncate">Not linked yet</p>`}
+            </div>
+          </div>
+
           <div class="border-t border-paper-100 dark:border-paper-800/80 pt-3 space-y-2">
             <h4 class="text-xs font-semibold uppercase tracking-wider text-paper-800/50 dark:text-paper-100/50">Checklist & Itinerary:</h4>
             ${itineraryHtml}
           </div>
         `;
+
+        const linkedAlbumButton = card.querySelector('.btn-open-linked-album');
+        if (linkedAlbumButton) {
+          linkedAlbumButton.addEventListener('click', () => openAlbumDetail(linkedAlbumButton.dataset.albumId));
+        }
 
         card.querySelector('.btn-edit-trip').addEventListener('click', () => openTripEditor(trip));
 
@@ -978,6 +1096,11 @@ function addActivityRow(location = '', activity = '', day = 'Day 1') {
       document.getElementById('createTripForm').reset();
       activitiesContainer.innerHTML = '';
       accommodationSection.classList.add('hidden');
+      document.getElementById('budgetFuel').value = '';
+      document.getElementById('budgetToll').value = '';
+      document.getElementById('budgetFood').value = '';
+      document.getElementById('budgetHotel').value = '';
+      populateTripAlbumSelect();
       addActivityRow(); // Baris kosong disediakan supaya pengguna terus isi sendiri
     }
 
@@ -990,6 +1113,11 @@ function addActivityRow(location = '', activity = '', day = 'Day 1') {
       document.getElementById('tripNights').value = trip.nights || '1';
       document.getElementById('checkInDate').value = trip.checkInDate || '';
       document.getElementById('checkOutDate').value = trip.checkOutDate || '';
+      document.getElementById('budgetFuel').value = trip.budget?.fuel || '';
+      document.getElementById('budgetToll').value = trip.budget?.toll || '';
+      document.getElementById('budgetFood').value = trip.budget?.food || '';
+      document.getElementById('budgetHotel').value = trip.budget?.hotel || '';
+      populateTripAlbumSelect(trip.linkedAlbumId || '');
       accommodationSection.classList.toggle('hidden', trip.tripType !== 'Overnight');
       activitiesContainer.innerHTML = '';
       const activities = trip.activities && trip.activities.length ? trip.activities : [{ location: '', activity: '', day: 'Day 1' }];
@@ -1005,6 +1133,13 @@ function addActivityRow(location = '', activity = '', day = 'Day 1') {
       const nights = document.getElementById('tripNights').value;
       const checkInDate = document.getElementById('checkInDate').value;
       const checkOutDate = document.getElementById('checkOutDate').value;
+      const linkedAlbumId = document.getElementById('tripAlbumLink').value;
+      const budget = {
+        fuel: moneyValue('budgetFuel'),
+        toll: moneyValue('budgetToll'),
+        food: moneyValue('budgetFood'),
+        hotel: moneyValue('budgetHotel')
+      };
 
       if (!destination) return;
 
@@ -1031,6 +1166,8 @@ function addActivityRow(location = '', activity = '', day = 'Day 1') {
           checkInDate,
           checkOutDate: tripType === 'Overnight' ? checkOutDate : null,
           activities,
+          budget,
+          linkedAlbumId,
           updatedAt: Date.now()
         };
 
