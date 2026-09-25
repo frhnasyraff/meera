@@ -217,6 +217,29 @@
           </div>
         </div>
 
+        <div class="bg-white/70 dark:bg-paper-900/70 border border-paper-200 dark:border-paper-800 rounded-3xl p-4 sm:p-6 shadow-sm space-y-4">
+          <div class="flex items-center justify-between gap-3">
+            <div>
+              <p class="text-[10px] uppercase tracking-widest text-terracotta-500 font-semibold">Trip Calendar</p>
+              <h3 id="tripCalendarTitle" class="font-serif text-2xl sm:text-3xl font-medium">Month</h3>
+            </div>
+            <div class="flex items-center gap-2">
+              <button id="btnPrevTripMonth" type="button" class="p-2 rounded-xl bg-paper-100 dark:bg-paper-950 hover:bg-paper-200 dark:hover:bg-paper-800 transition-colors" title="Previous month">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+              </button>
+              <button id="btnTodayTripMonth" type="button" class="px-3 py-2 rounded-xl bg-paper-100 dark:bg-paper-950 hover:bg-paper-200 dark:hover:bg-paper-800 text-xs font-semibold transition-colors">Today</button>
+              <button id="btnNextTripMonth" type="button" class="p-2 rounded-xl bg-paper-100 dark:bg-paper-950 hover:bg-paper-200 dark:hover:bg-paper-800 transition-colors" title="Next month">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="grid grid-cols-7 gap-1 text-center text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-paper-800/45 dark:text-paper-100/45">
+            <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+          </div>
+          <div id="tripCalendarGrid" class="grid grid-cols-7 gap-1 sm:gap-2"></div>
+          <p class="text-[11px] text-paper-800/45 dark:text-paper-100/45">Trip yang ada date akan appear dekat calendar ni.</p>
+        </div>
+
         <!-- Trips List Container -->
         <div id="tripsListGrid" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
 
@@ -375,13 +398,18 @@
               </label>
             </div>
           </div>
+
+          <div class="space-y-1">
+            <label for="checkInDate" class="text-xs font-semibold uppercase tracking-wider text-paper-800/60 dark:text-paper-100/60">Trip Date *</label>
+            <input type="date" id="checkInDate" required class="w-full px-4 py-2.5 rounded-xl bg-paper-50 dark:bg-paper-950 border border-paper-200 dark:border-paper-800 text-sm focus:outline-none focus:border-terracotta-500">
+          </div>
         </div>
 
         <!-- 2. Accommodation Info (Overnight Only) -->
         <div id="accommodationSection" class="hidden space-y-4 bg-paper-50/50 dark:bg-paper-950/50 p-4 rounded-2xl border border-paper-200/60 dark:border-paper-800">
           <h4 class="font-serif text-lg font-semibold text-terracotta-600 dark:text-terracotta-400 border-b border-paper-200/60 dark:border-paper-800 pb-1">2. Accommodation Info</h4>
 
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div class="space-y-1">
               <label for="tripNights" class="text-xs font-semibold uppercase tracking-wider text-paper-800/60 dark:text-paper-100/60">How many nights?</label>
               <select id="tripNights" class="w-full px-4 py-2 rounded-xl bg-white dark:bg-paper-900 border border-paper-200 dark:border-paper-800 text-sm focus:outline-none focus:border-terracotta-500">
@@ -391,11 +419,6 @@
                 <option value="4">4 Nights</option>
                 <option value="5+">5+ Nights</option>
               </select>
-            </div>
-
-            <div class="space-y-1">
-              <label for="checkInDate" class="text-xs font-semibold uppercase tracking-wider text-paper-800/60 dark:text-paper-100/60">Check-in Date</label>
-              <input type="date" id="checkInDate" class="w-full px-4 py-2 rounded-xl bg-white dark:bg-paper-900 border border-paper-200 dark:border-paper-800 text-xs focus:outline-none focus:border-terracotta-500">
             </div>
 
             <div class="space-y-1">
@@ -580,6 +603,7 @@
     let lightboxList = [];
     let currentTripTab = 'upcoming';
     let editingTripId = null;
+    let tripCalendarCursor = new Date();
 
     const albumsViewSection = document.getElementById('albumsViewSection');
     const albumDetailViewSection = document.getElementById('albumDetailViewSection');
@@ -590,6 +614,8 @@
     const albumsEmptyState = document.getElementById('albumsEmptyState');
     const tripsListGrid = document.getElementById('tripsListGrid');
     const tripsEmptyState = document.getElementById('tripsEmptyState');
+    const tripCalendarTitle = document.getElementById('tripCalendarTitle');
+    const tripCalendarGrid = document.getElementById('tripCalendarGrid');
 
     const galleryContainer = document.getElementById('galleryContainer');
     const photosEmptyState = document.getElementById('photosEmptyState');
@@ -655,21 +681,107 @@
       }
 
       renderAlbumsGrid(allPhotos);
+      renderTripCalendar();
       renderTripsList();
     }
 
+    function parseLocalDate(value) {
+      if (!value) return null;
+      const parts = value.split('-').map(Number);
+      if (parts.length !== 3 || parts.some(Number.isNaN)) return null;
+      return new Date(parts[0], parts[1] - 1, parts[2]);
+    }
+
+    function toDateKey(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    function getTripStartDate(trip) {
+      return parseLocalDate(trip.checkInDate);
+    }
+
+    function getTripEndDate(trip) {
+      return parseLocalDate(trip.tripType === 'Overnight' ? (trip.checkOutDate || trip.checkInDate) : trip.checkInDate);
+    }
+
+    function isTripPast(trip, now = Date.now()) {
+      const endDate = getTripEndDate(trip);
+      if (endDate) {
+        endDate.setHours(23, 59, 59, 999);
+        return endDate.getTime() < now;
+      }
+      return trip.createdAt < (now - 86400000 * 2);
+    }
+
+    function tripTouchesDate(trip, date) {
+      const start = getTripStartDate(trip);
+      if (!start) return false;
+      const end = getTripEndDate(trip) || start;
+      const day = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+      start.setHours(0, 0, 0, 0);
+      end.setHours(23, 59, 59, 999);
+      return day >= start.getTime() && day <= end.getTime();
+    }
+
+    function renderTripCalendar() {
+      tripCalendarGrid.innerHTML = '';
+      const cursor = new Date(tripCalendarCursor.getFullYear(), tripCalendarCursor.getMonth(), 1);
+      const todayKey = toDateKey(new Date());
+      const monthName = cursor.toLocaleDateString('en-MY', { month: 'long', year: 'numeric' });
+      tripCalendarTitle.textContent = monthName;
+
+      const firstDay = cursor.getDay();
+      const daysInMonth = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 0).getDate();
+      const totalCells = Math.ceil((firstDay + daysInMonth) / 7) * 7;
+      const upcomingTrips = trips.filter(trip => !isTripPast(trip));
+
+      for (let i = 0; i < totalCells; i++) {
+        const dayNumber = i - firstDay + 1;
+        const cell = document.createElement('div');
+        cell.className = 'min-h-[78px] sm:min-h-[96px] rounded-2xl border border-paper-200/70 dark:border-paper-800 bg-paper-50/60 dark:bg-paper-950/60 p-2 text-left overflow-hidden';
+
+        if (dayNumber < 1 || dayNumber > daysInMonth) {
+          cell.classList.add('opacity-35');
+          tripCalendarGrid.appendChild(cell);
+          continue;
+        }
+
+        const date = new Date(cursor.getFullYear(), cursor.getMonth(), dayNumber);
+        const key = toDateKey(date);
+        const dayTrips = upcomingTrips.filter(trip => tripTouchesDate(trip, date));
+        const isToday = key === todayKey;
+        if (dayTrips.length) cell.classList.add('border-terracotta-500/50', 'bg-terracotta-500/5');
+
+        cell.innerHTML = `
+          <div class="flex items-center justify-between gap-1 mb-1">
+            <span class="inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-semibold ${isToday ? 'bg-terracotta-500 text-white' : 'text-paper-800/70 dark:text-paper-100/70'}">${dayNumber}</span>
+            ${dayTrips.length ? `<span class="text-[10px] font-semibold text-terracotta-500">${dayTrips.length}</span>` : ''}
+          </div>
+          <div class="space-y-1">
+            ${dayTrips.slice(0, 2).map(trip => `<button type="button" class="calendar-trip w-full text-left px-2 py-1 rounded-lg bg-white dark:bg-paper-900 border border-terracotta-500/20 text-[10px] sm:text-xs leading-tight text-paper-800 dark:text-paper-100 truncate" data-trip-id="${trip.id}">${escapeHTML(trip.destination)}</button>`).join('')}
+            ${dayTrips.length > 2 ? `<p class="text-[10px] text-paper-800/45 dark:text-paper-100/45 px-1">+${dayTrips.length - 2} more</p>` : ''}
+          </div>
+        `;
+
+        cell.querySelectorAll('.calendar-trip').forEach(button => {
+          button.addEventListener('click', () => {
+            const trip = trips.find(item => item.id === button.dataset.tripId);
+            if (trip) openTripEditor(trip);
+          });
+        });
+        tripCalendarGrid.appendChild(cell);
+      }
+    }
     /* RENDER TRIPS LIST (PAST & UPCOMING) */
     function renderTripsList() {
       tripsListGrid.innerHTML = '';
       const now = Date.now();
 
       let filteredTrips = trips.filter(t => {
-        let isPast = false;
-        if (t.tripType === 'Overnight' && t.checkOutDate) {
-          isPast = new Date(t.checkOutDate).getTime() < now;
-        } else {
-          isPast = t.createdAt < (now - 86400000 * 2);
-        }
+        const isPast = isTripPast(t, now);
         return currentTripTab === 'past' ? isPast : !isPast;
       });
 
@@ -688,6 +800,9 @@
           const days = (parseInt(trip.nights || 1) + 1);
           nightsText = ` (${days} Days ${trip.nights} Nights)`;
         }
+        const tripDateText = trip.checkInDate
+          ? (trip.tripType === 'Overnight' && trip.checkOutDate ? `${trip.checkInDate} ➔ ${trip.checkOutDate}` : trip.checkInDate)
+          : '';
 
         // Group activities by Day
         const activitiesByDay = {};
@@ -725,7 +840,7 @@
               <p class="text-xs text-paper-800/60 dark:text-paper-100/60 mt-0.5">
                 Trip Status: <span class="font-medium text-paper-800 dark:text-paper-100">${escapeHTML(trip.tripType)}${nightsText}</span>
               </p>
-              ${trip.checkInDate ? `<p class="text-[11px] text-paper-800/50 dark:text-paper-100/50 font-mono mt-0.5">${trip.checkInDate} ➔${trip.checkOutDate}</p>` : ''}
+              ${tripDateText ? `<p class="text-[11px] text-paper-800/50 dark:text-paper-100/50 font-mono mt-0.5">${tripDateText}</p>` : ''}
             </div>
 
             <div class="flex items-center gap-1">
@@ -770,6 +885,21 @@
       document.getElementById('tabPastTrips').className = 'px-4 py-1.5 rounded-lg text-xs font-semibold bg-white dark:bg-paper-800 shadow-sm transition-all';
       document.getElementById('tabUpcomingTrips').className = 'px-4 py-1.5 rounded-lg text-xs font-semibold text-paper-800/60 dark:text-paper-100/60 hover:text-paper-800 transition-all';
       renderTripsList();
+    });
+
+    document.getElementById('btnPrevTripMonth').addEventListener('click', () => {
+      tripCalendarCursor = new Date(tripCalendarCursor.getFullYear(), tripCalendarCursor.getMonth() - 1, 1);
+      renderTripCalendar();
+    });
+
+    document.getElementById('btnTodayTripMonth').addEventListener('click', () => {
+      tripCalendarCursor = new Date();
+      renderTripCalendar();
+    });
+
+    document.getElementById('btnNextTripMonth').addEventListener('click', () => {
+      tripCalendarCursor = new Date(tripCalendarCursor.getFullYear(), tripCalendarCursor.getMonth() + 1, 1);
+      renderTripCalendar();
     });
 
     document.getElementById('btnOpenCreateTrip').addEventListener('click', () => {
@@ -898,7 +1028,7 @@ function addActivityRow(location = '', activity = '', day = 'Day 1') {
           destination,
           tripType,
           nights: tripType === 'Overnight' ? nights : null,
-          checkInDate: tripType === 'Overnight' ? checkInDate : null,
+          checkInDate,
           checkOutDate: tripType === 'Overnight' ? checkOutDate : null,
           activities,
           updatedAt: Date.now()
