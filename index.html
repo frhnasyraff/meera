@@ -147,7 +147,7 @@
 
   <header class="lg:hidden sticky top-0 z-40 backdrop-blur-md bg-paper-50/90 dark:bg-paper-950/90 border-b border-paper-200/60 dark:border-paper-800/60 transition-colors">
     <div class="px-4 h-20 flex items-center justify-between gap-3">
-      <button type="button" data-page="home" class="nav-link flex items-center gap-3 min-w-0">
+      <button id="mobileBrandHomeBtn" type="button" class="flex items-center gap-3 min-w-0">
         <span class="w-10 h-10 rounded-full bg-terracotta-500/10 text-terracotta-600 flex items-center justify-center font-serif text-xl italic font-semibold">F&M</span>
         <span class="font-serif text-xl tracking-tight font-medium truncate">Farhan & Meera</span>
       </button>
@@ -742,16 +742,8 @@
       </div>
 
       <div class="relative flex-1 flex items-center justify-center my-3 sm:my-4 overflow-hidden min-h-0 rounded-3xl sm:rounded-none bg-white/[0.03] sm:bg-transparent">
-        <button id="prevPhotoBtn" class="absolute left-2 sm:left-4 z-20 p-3 rounded-full bg-black/25 hover:bg-black/40 backdrop-blur text-white transition-all shadow-lg">
-          <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-        </button>
-
         <img id="modalImage" src="" alt="Full view memory" class="max-h-[58vh] sm:max-h-[75vh] max-w-full object-contain rounded-2xl sm:rounded-lg shadow-2xl transition-transform duration-300">
         <video id="modalVideo" class="hidden max-h-[58vh] sm:max-h-[75vh] max-w-full object-contain rounded-2xl sm:rounded-lg shadow-2xl bg-black" controls playsinline></video>
-
-        <button id="nextPhotoBtn" class="absolute right-2 sm:right-4 z-20 p-3 rounded-full bg-black/25 hover:bg-black/40 backdrop-blur text-white transition-all shadow-lg">
-          <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-        </button>
       </div>
 
       <div class="max-w-3xl mx-auto w-full text-center space-y-2 bg-white/10 backdrop-blur-md p-4 sm:p-6 rounded-3xl sm:rounded-2xl border border-white/10 shadow-2xl">
@@ -812,6 +804,8 @@
     let currentSort = 'newest';
     let activePhotoIndex = -1;
     let lightboxList = [];
+    let touchStartX = 0;
+    let touchStartY = 0;
     let currentTripTab = 'upcoming';
     let editingTripId = null;
     let tripCalendarCursor = new Date();
@@ -1837,6 +1831,9 @@ function addActivityRow(location = '', activity = '', day = 'Day 1') {
       e.preventDefault();
       showAppPage('home');
     });
+    document.getElementById('mobileBrandHomeBtn').addEventListener('click', () => {
+      showAppPage('home');
+    });
 
     /* LIGHTBOX & CAPTION EDITING ENGINE */
     function openLightbox(index, list) {
@@ -1871,6 +1868,12 @@ function addActivityRow(location = '', activity = '', day = 'Day 1') {
       captionEditContainer.classList.add('hidden');
 
       photoModal.showModal();
+    }
+
+    function showLightboxOffset(offset) {
+      if (!lightboxList.length) return;
+      activePhotoIndex = (activePhotoIndex + offset + lightboxList.length) % lightboxList.length;
+      openLightbox(activePhotoIndex, lightboxList);
     }
 
     document.getElementById('modalEditBtn').addEventListener('click', () => {
@@ -1945,13 +1948,28 @@ function addActivityRow(location = '', activity = '', day = 'Day 1') {
     });
 
     document.getElementById('modalCloseBtn').addEventListener('click', () => photoModal.close());
-    document.getElementById('prevPhotoBtn').addEventListener('click', () => {
-      activePhotoIndex = (activePhotoIndex - 1 + lightboxList.length) % lightboxList.length;
-      openLightbox(activePhotoIndex, lightboxList);
-    });
-    document.getElementById('nextPhotoBtn').addEventListener('click', () => {
-      activePhotoIndex = (activePhotoIndex + 1) % lightboxList.length;
-      openLightbox(activePhotoIndex, lightboxList);
+
+    photoModal.addEventListener('touchstart', (e) => {
+      if (!photoModal.open || e.touches.length !== 1) return;
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+    }, { passive: true });
+
+    photoModal.addEventListener('touchend', (e) => {
+      if (!photoModal.open || !touchStartX) return;
+      const touch = e.changedTouches[0];
+      const diffX = touch.clientX - touchStartX;
+      const diffY = touch.clientY - touchStartY;
+      touchStartX = 0;
+      touchStartY = 0;
+      if (Math.abs(diffX) < 50 || Math.abs(diffX) < Math.abs(diffY) * 1.2) return;
+      showLightboxOffset(diffX < 0 ? 1 : -1);
+    }, { passive: true });
+
+    document.addEventListener('keydown', (e) => {
+      if (!photoModal.open) return;
+      if (e.key === 'ArrowRight') showLightboxOffset(1);
+      if (e.key === 'ArrowLeft') showLightboxOffset(-1);
     });
 
     function formatDate(ts) {
