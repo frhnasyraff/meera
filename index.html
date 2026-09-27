@@ -453,6 +453,7 @@
           <h1 id="albumHeaderTitle" class="font-serif text-3xl sm:text-5xl font-medium">Album Name</h1>
           <p id="albumHeaderDesc" class="text-sm sm:text-base text-white/80 font-light max-w-2xl italic font-serif">Album description here...</p>
           <div id="albumHeaderMeta" class="text-xs text-white/60 pt-2 font-mono">0 photos • Created on date</div>
+          <button id="btnEditAlbumLocation" type="button" class="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/15 hover:bg-white/25 text-[11px] font-semibold backdrop-blur transition-colors">📍 Set album location</button>
         </div>
       </div>
 
@@ -485,13 +486,30 @@
             <div class="md:col-span-2 space-y-1">
               <label for="uploadMessage" class="text-xs font-semibold uppercase tracking-wider text-paper-800/60 dark:text-paper-100/60">Caption / Wish</label>
               <input type="text" id="uploadMessage" placeholder="Contoh: time ni best giler hehee" class="w-full px-4 py-2.5 rounded-xl bg-paper-50 dark:bg-paper-950 border border-paper-200 dark:border-paper-800 text-sm focus:outline-none focus:border-terracotta-500 dark:focus:border-terracotta-400">
-              <label class="mt-3 flex items-start gap-3 rounded-2xl border border-paper-200 dark:border-paper-800 bg-paper-50/70 dark:bg-paper-950/70 px-4 py-3 cursor-pointer">
-                <input id="includeLocationToggle" type="checkbox" class="mt-0.5 accent-terracotta-500">
-                <span>
-                  <span class="block text-xs font-semibold text-paper-800 dark:text-paper-100">Add current location</span>
-                  <span class="block text-[11px] text-paper-800/50 dark:text-paper-100/50">Optional. Browser akan minta permission, then memory ni simpan pin location.</span>
-                </span>
-              </label>
+              <div class="mt-3 rounded-2xl border border-paper-200 dark:border-paper-800 bg-paper-50/70 dark:bg-paper-950/70 p-4 space-y-3">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div>
+                    <p class="text-xs font-semibold text-paper-800 dark:text-paper-100">Add location</p>
+                    <p class="text-[11px] text-paper-800/50 dark:text-paper-100/50">Search tempat, or guna current location.</p>
+                  </div>
+                  <button id="btnUseCurrentLocation" type="button" class="px-3 py-2 rounded-xl bg-white dark:bg-paper-900 border border-paper-200 dark:border-paper-800 text-[11px] font-semibold hover:border-terracotta-500 transition-colors">Use current</button>
+                </div>
+
+                <div class="flex gap-2">
+                  <input id="locationSearchInput" type="text" placeholder="Search place, e.g. Pasar Seni" class="flex-1 min-w-0 px-3 py-2 rounded-xl bg-white dark:bg-paper-900 border border-paper-200 dark:border-paper-800 text-xs focus:outline-none focus:border-terracotta-500">
+                  <button id="btnSearchLocation" type="button" class="px-3 py-2 rounded-xl bg-paper-800 dark:bg-paper-100 text-paper-50 dark:text-paper-900 text-[11px] font-semibold hover:bg-terracotta-500 dark:hover:bg-terracotta-400 dark:hover:text-white transition-colors">Search</button>
+                </div>
+
+                <div id="locationSearchStatus" class="hidden text-[11px] text-paper-800/50 dark:text-paper-100/50"></div>
+                <div id="locationResults" class="hidden space-y-2"></div>
+                <div id="selectedLocationBox" class="hidden flex items-start justify-between gap-3 rounded-xl bg-terracotta-500/10 border border-terracotta-500/20 px-3 py-2">
+                  <div class="min-w-0">
+                    <p id="selectedLocationName" class="text-xs font-semibold text-paper-800 dark:text-paper-100 truncate"></p>
+                    <p id="selectedLocationCoords" class="text-[10px] text-paper-800/50 dark:text-paper-100/50"></p>
+                  </div>
+                  <button id="btnClearLocation" type="button" class="text-[11px] font-semibold text-terracotta-600 dark:text-terracotta-300">Clear</button>
+                </div>
+              </div>
             </div>
 
           <div class="flex items-end">
@@ -776,8 +794,22 @@
         </div>
 
         <!-- Caption Edit Container (Hidden by default) -->
-        <div id="captionEditContainer" class="hidden flex flex-col sm:flex-row gap-2 max-w-lg mx-auto">
-          <input type="text" id="editCaptionInput" placeholder="Tulis caption baru..." class="flex-1 px-4 py-2 rounded-xl bg-black/50 border border-white/20 text-white text-sm focus:outline-none focus:border-terracotta-400">
+        <div id="captionEditContainer" class="hidden max-w-lg mx-auto space-y-2">
+          <div class="flex flex-col sm:flex-row gap-2">
+            <input type="text" id="editCaptionInput" placeholder="Tulis caption baru..." class="flex-1 px-4 py-2 rounded-xl bg-black/50 border border-white/20 text-white text-sm focus:outline-none focus:border-terracotta-400">
+            <button id="btnUseCurrentEditLocation" type="button" class="px-3 py-2 rounded-xl bg-white/15 hover:bg-white/25 text-white text-xs font-medium">Use current</button>
+            <button id="btnClearEditLocation" type="button" class="px-3 py-2 rounded-xl bg-white/15 hover:bg-white/25 text-white text-xs font-medium">Clear pin</button>
+          </div>
+          <div class="flex flex-col sm:flex-row gap-2">
+            <input type="text" id="editLocationSearchInput" placeholder="Search location..." class="flex-1 px-4 py-2 rounded-xl bg-black/50 border border-white/20 text-white text-sm focus:outline-none focus:border-terracotta-400">
+            <button id="btnSearchEditLocation" type="button" class="px-3 py-2 rounded-xl bg-white/15 hover:bg-white/25 text-white text-xs font-medium">Search</button>
+          </div>
+          <div id="editLocationStatus" class="hidden text-[11px] text-white/55"></div>
+          <div id="editLocationResults" class="hidden space-y-2 text-left"></div>
+          <div id="editSelectedLocationBox" class="hidden rounded-xl bg-white/10 px-3 py-2 text-left">
+            <p id="editSelectedLocationName" class="text-xs font-semibold text-white truncate"></p>
+            <p id="editSelectedLocationCoords" class="text-[10px] text-white/50"></p>
+          </div>
           <div class="flex gap-2 justify-center">
             <button id="btnSaveCaption" type="button" class="px-4 py-2 rounded-xl bg-terracotta-500 hover:bg-terracotta-600 text-white text-xs font-semibold">Save</button>
             <button id="btnCancelCaption" type="button" class="px-4 py-2 rounded-xl bg-white/20 hover:bg-white/30 text-white text-xs font-medium">Cancel</button>
@@ -831,6 +863,8 @@
     let touchStartY = 0;
     let touchLastX = 0;
     let isHorizontalSwipe = false;
+    let selectedUploadLocation = null;
+    let selectedEditLocation = null;
     let currentTripTab = 'upcoming';
     let editingTripId = null;
     let tripCalendarCursor = new Date();
@@ -871,6 +905,18 @@
     const captionDisplayContainer = document.getElementById('captionDisplayContainer');
     const captionEditContainer = document.getElementById('captionEditContainer');
     const editCaptionInput = document.getElementById('editCaptionInput');
+    const locationSearchInput = document.getElementById('locationSearchInput');
+    const locationSearchStatus = document.getElementById('locationSearchStatus');
+    const locationResults = document.getElementById('locationResults');
+    const selectedLocationBox = document.getElementById('selectedLocationBox');
+    const selectedLocationName = document.getElementById('selectedLocationName');
+    const selectedLocationCoords = document.getElementById('selectedLocationCoords');
+    const editLocationSearchInput = document.getElementById('editLocationSearchInput');
+    const editLocationStatus = document.getElementById('editLocationStatus');
+    const editLocationResults = document.getElementById('editLocationResults');
+    const editSelectedLocationBox = document.getElementById('editSelectedLocationBox');
+    const editSelectedLocationName = document.getElementById('editSelectedLocationName');
+    const editSelectedLocationCoords = document.getElementById('editSelectedLocationCoords');
 
     function createCustomId() {
       if (window.crypto && typeof window.crypto.randomUUID === 'function') {
@@ -887,18 +933,28 @@
       return memory?.mediaType === 'video' || memory?.resourceType === 'video';
     }
 
+    function getEffectiveLocation(memory) {
+      return Number.isFinite(memory?.location?.latitude) && Number.isFinite(memory?.location?.longitude)
+        ? memory.location
+        : currentAlbum?.location || null;
+    }
+
     function hasMemoryLocation(memory) {
-      return Number.isFinite(memory?.location?.latitude) && Number.isFinite(memory?.location?.longitude);
+      const location = getEffectiveLocation(memory);
+      return Number.isFinite(location?.latitude) && Number.isFinite(location?.longitude);
     }
 
     function formatLocation(memory) {
       if (!hasMemoryLocation(memory)) return '';
-      return `${memory.location.latitude.toFixed(4)}, ${memory.location.longitude.toFixed(4)}`;
+      const location = getEffectiveLocation(memory);
+      if (location.name) return location.name;
+      return `${location.latitude.toFixed(4)}, ${location.longitude.toFixed(4)}`;
     }
 
     function getMapUrl(memory) {
       if (!hasMemoryLocation(memory)) return '#';
-      return `https://www.google.com/maps?q=${memory.location.latitude},${memory.location.longitude}`;
+      const location = getEffectiveLocation(memory);
+      return `https://www.google.com/maps?q=${location.latitude},${location.longitude}`;
     }
 
     function getCurrentLocation() {
@@ -917,6 +973,142 @@
           { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 }
         );
       });
+    }
+
+    function setUploadLocation(location) {
+      selectedUploadLocation = location;
+      if (!location) {
+        selectedLocationBox.classList.add('hidden');
+        selectedLocationName.textContent = '';
+        selectedLocationCoords.textContent = '';
+        return;
+      }
+      selectedLocationName.textContent = location.name || 'Selected location';
+      selectedLocationCoords.textContent = `${location.latitude.toFixed(4)}, ${location.longitude.toFixed(4)}`;
+      selectedLocationBox.classList.remove('hidden');
+    }
+
+    function setLocationStatus(message = '') {
+      locationSearchStatus.textContent = message;
+      locationSearchStatus.classList.toggle('hidden', !message);
+    }
+
+    function locationFromSearchResult(result) {
+      return {
+        name: result.display_name,
+        latitude: Number(result.lat),
+        longitude: Number(result.lon),
+        source: 'search',
+        capturedAt: Date.now()
+      };
+    }
+
+    async function fetchLocationResults(queryText) {
+      const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=5&q=${encodeURIComponent(queryText)}`, {
+        headers: { 'Accept': 'application/json' }
+      });
+      if (!response.ok) throw new Error('Location search failed');
+      return response.json();
+    }
+
+    function renderLocationResults(results = []) {
+      locationResults.innerHTML = '';
+      if (!results.length) {
+        locationResults.classList.add('hidden');
+        return;
+      }
+      results.slice(0, 5).forEach(result => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'w-full text-left rounded-xl border border-paper-200 dark:border-paper-800 bg-white/80 dark:bg-paper-900/80 px-3 py-2 hover:border-terracotta-500 transition-colors';
+        button.innerHTML = `
+          <span class="block text-xs font-semibold text-paper-800 dark:text-paper-100 truncate">${escapeHTML(result.display_name)}</span>
+          <span class="block text-[10px] text-paper-800/45 dark:text-paper-100/45">${Number(result.lat).toFixed(4)}, ${Number(result.lon).toFixed(4)}</span>
+        `;
+        button.addEventListener('click', () => {
+          setUploadLocation(locationFromSearchResult(result));
+          locationResults.classList.add('hidden');
+          setLocationStatus('');
+        });
+        locationResults.appendChild(button);
+      });
+      locationResults.classList.remove('hidden');
+    }
+
+    async function searchLocations() {
+      const queryText = locationSearchInput.value.trim();
+      if (!queryText) {
+        setLocationStatus('Type tempat dulu.');
+        return;
+      }
+      setLocationStatus('Searching place...');
+      locationResults.classList.add('hidden');
+      try {
+        const results = await fetchLocationResults(queryText);
+        renderLocationResults(results);
+        setLocationStatus(results.length ? 'Choose one place below.' : 'Tak jumpa tempat tu.');
+      } catch (err) {
+        setLocationStatus('Search location failed. Try nama tempat lain.');
+      }
+    }
+
+    function setEditLocation(location) {
+      selectedEditLocation = location;
+      if (!location) {
+        editSelectedLocationBox.classList.add('hidden');
+        editSelectedLocationName.textContent = '';
+        editSelectedLocationCoords.textContent = '';
+        return;
+      }
+      editSelectedLocationName.textContent = location.name || 'Selected location';
+      editSelectedLocationCoords.textContent = `${location.latitude.toFixed(4)}, ${location.longitude.toFixed(4)}`;
+      editSelectedLocationBox.classList.remove('hidden');
+    }
+
+    function setEditLocationStatus(message = '') {
+      editLocationStatus.textContent = message;
+      editLocationStatus.classList.toggle('hidden', !message);
+    }
+
+    function renderEditLocationResults(results = []) {
+      editLocationResults.innerHTML = '';
+      if (!results.length) {
+        editLocationResults.classList.add('hidden');
+        return;
+      }
+      results.slice(0, 4).forEach(result => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'w-full text-left rounded-xl bg-white/10 px-3 py-2 hover:bg-white/20 transition-colors';
+        button.innerHTML = `
+          <span class="block text-xs font-semibold text-white truncate">${escapeHTML(result.display_name)}</span>
+          <span class="block text-[10px] text-white/50">${Number(result.lat).toFixed(4)}, ${Number(result.lon).toFixed(4)}</span>
+        `;
+        button.addEventListener('click', () => {
+          setEditLocation(locationFromSearchResult(result));
+          editLocationResults.classList.add('hidden');
+          setEditLocationStatus('');
+        });
+        editLocationResults.appendChild(button);
+      });
+      editLocationResults.classList.remove('hidden');
+    }
+
+    async function searchEditLocations() {
+      const queryText = editLocationSearchInput.value.trim();
+      if (!queryText) {
+        setEditLocationStatus('Type tempat dulu.');
+        return;
+      }
+      setEditLocationStatus('Searching place...');
+      editLocationResults.classList.add('hidden');
+      try {
+        const results = await fetchLocationResults(queryText);
+        renderEditLocationResults(results);
+        setEditLocationStatus(results.length ? 'Choose one place below.' : 'Tak jumpa tempat tu.');
+      } catch (err) {
+        setEditLocationStatus('Search location failed. Try nama tempat lain.');
+      }
     }
 
     function getVideoPosterUrl(url) {
@@ -1614,6 +1806,7 @@ function addActivityRow(location = '', activity = '', day = 'Day 1') {
       document.getElementById('albumHeaderDesc').textContent = currentAlbum.description || 'No description added.';
       document.getElementById('albumHeaderTag').textContent = currentAlbum.tag || 'General';
       document.getElementById('albumHeaderCoverImg').src = currentAlbum.coverUrl;
+      document.getElementById('btnEditAlbumLocation').textContent = currentAlbum.location ? `📍 ${formatLocation(currentAlbum)}` : '📍 Set album location';
 
       await loadAlbumPhotos();
     }
@@ -1773,6 +1966,51 @@ function addActivityRow(location = '', activity = '', day = 'Day 1') {
     document.getElementById('closeCreateAlbumModal').addEventListener('click', () => createAlbumModal.close());
     document.getElementById('cancelCreateAlbumBtn').addEventListener('click', () => createAlbumModal.close());
 
+    document.getElementById('btnSearchLocation').addEventListener('click', searchLocations);
+    locationSearchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        searchLocations();
+      }
+    });
+    document.getElementById('btnClearLocation').addEventListener('click', () => {
+      setUploadLocation(null);
+      locationResults.classList.add('hidden');
+      setLocationStatus('');
+    });
+    document.getElementById('btnUseCurrentLocation').addEventListener('click', async () => {
+      setLocationStatus('Getting current location...');
+      try {
+        const current = await getCurrentLocation();
+        setUploadLocation({ ...current, name: 'Current location', source: 'current' });
+        setLocationStatus('');
+      } catch (err) {
+        setLocationStatus(err.message);
+      }
+    });
+    document.getElementById('btnSearchEditLocation').addEventListener('click', searchEditLocations);
+    editLocationSearchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        searchEditLocations();
+      }
+    });
+    document.getElementById('btnUseCurrentEditLocation').addEventListener('click', async () => {
+      setEditLocationStatus('Getting current location...');
+      try {
+        const current = await getCurrentLocation();
+        setEditLocation({ ...current, name: 'Current location', source: 'current' });
+        setEditLocationStatus('');
+      } catch (err) {
+        setEditLocationStatus(err.message);
+      }
+    });
+    document.getElementById('btnClearEditLocation').addEventListener('click', () => {
+      setEditLocation(null);
+      setEditLocationStatus('Location will be removed after Save.');
+      editLocationResults.classList.add('hidden');
+    });
+
     createAlbumForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const title = document.getElementById('newAlbumTitle').value.trim();
@@ -1818,7 +2056,6 @@ function addActivityRow(location = '', activity = '', day = 'Day 1') {
       if (!files.length) return;
 
       const message = document.getElementById('uploadMessage').value.trim();
-      const shouldIncludeLocation = document.getElementById('includeLocationToggle').checked;
       const saveBtn = document.getElementById('savePhotosBtn');
       const saveBtnText = document.getElementById('savePhotosBtnText');
       const uploadProgressBox = document.getElementById('uploadProgressBox');
@@ -1834,12 +2071,7 @@ function addActivityRow(location = '', activity = '', day = 'Day 1') {
       uploadProgressDetail.textContent = 'Starting upload...';
 
       try {
-        let uploadLocation = null;
-        if (shouldIncludeLocation) {
-          uploadProgressTitle.textContent = 'Getting location...';
-          uploadProgressDetail.textContent = 'Allow location permission dekat browser.';
-          uploadLocation = await getCurrentLocation();
-        }
+        const uploadLocation = selectedUploadLocation ? { ...selectedUploadLocation } : null;
 
         uploadProgressTitle.textContent = `Uploading ${files.length} item${files.length > 1 ? 's' : ''}...`;
         for (const [index, file] of files.entries()) {
@@ -1869,6 +2101,9 @@ function addActivityRow(location = '', activity = '', day = 'Day 1') {
         uploadProgressTitle.textContent = 'Upload done';
         uploadProgressDetail.textContent = 'Refreshing album...';
         document.getElementById('uploadToAlbumForm').reset();
+        setUploadLocation(null);
+        locationResults.classList.add('hidden');
+        setLocationStatus('');
         document.getElementById('fileCountBadge').textContent = 'PNG, JPG, WEBP, GIF, MP4, MOV';
         await loadAlbumPhotos();
         await loadData();
@@ -1907,6 +2142,37 @@ function addActivityRow(location = '', activity = '', day = 'Day 1') {
     });
     document.getElementById('mobileBrandHomeBtn').addEventListener('click', () => {
       showAppPage('home');
+    });
+    document.getElementById('btnEditAlbumLocation').addEventListener('click', async () => {
+      if (!currentAlbum) return;
+      const place = prompt('Search album location:', currentAlbum.location?.name || currentAlbum.title || '');
+      if (place === null) return;
+      const queryText = place.trim();
+      if (!queryText) {
+        await updateDoc(doc(firestore, 'albums', currentAlbum.id), { location: null });
+        currentAlbum.location = null;
+        document.getElementById('btnEditAlbumLocation').textContent = '📍 Set album location';
+        renderAlbumPhotos();
+        return;
+      }
+      const button = document.getElementById('btnEditAlbumLocation');
+      const oldText = button.textContent;
+      button.textContent = 'Searching location...';
+      try {
+        const results = await fetchLocationResults(queryText);
+        if (!results.length) {
+          alert('Tak jumpa location tu. Try nama tempat lain.');
+          return;
+        }
+        const location = locationFromSearchResult(results[0]);
+        await updateDoc(doc(firestore, 'albums', currentAlbum.id), { location });
+        currentAlbum.location = location;
+        button.textContent = `📍 ${formatLocation(currentAlbum)}`;
+        renderAlbumPhotos();
+      } catch (err) {
+        alert('Gagal update album location: ' + err.message);
+        button.textContent = oldText;
+      }
     });
 
     /* LIGHTBOX & CAPTION EDITING ENGINE */
@@ -1990,6 +2256,10 @@ function addActivityRow(location = '', activity = '', day = 'Day 1') {
       if (!photo) return;
 
       editCaptionInput.value = photo.message || '';
+      editLocationSearchInput.value = '';
+      editLocationResults.classList.add('hidden');
+      setEditLocationStatus(photo.location ? '' : (currentAlbum?.location ? 'No own pin. Using album location unless you choose one.' : 'No location selected.'));
+      setEditLocation(photo.location || null);
       captionDisplayContainer.classList.add('hidden');
       captionEditContainer.classList.remove('hidden');
       editCaptionInput.focus();
@@ -1998,6 +2268,9 @@ function addActivityRow(location = '', activity = '', day = 'Day 1') {
     document.getElementById('btnCancelCaption').addEventListener('click', () => {
       captionDisplayContainer.classList.remove('hidden');
       captionEditContainer.classList.add('hidden');
+      setEditLocation(null);
+      setEditLocationStatus('');
+      editLocationResults.classList.add('hidden');
     });
 
     document.getElementById('btnSaveCaption').addEventListener('click', async () => {
@@ -2009,13 +2282,26 @@ function addActivityRow(location = '', activity = '', day = 'Day 1') {
       saveBtn.textContent = '...';
 
       try {
-        await updateDoc(doc(firestore, 'photos', photo.id), { message: newMsg });
+        await updateDoc(doc(firestore, 'photos', photo.id), {
+          message: newMsg,
+          location: selectedEditLocation
+        });
 
         photo.message = newMsg;
+        photo.location = selectedEditLocation;
         modalNote.textContent = newMsg ? `"${newMsg}"` : 'No caption attached.';
+        if (hasMemoryLocation(photo)) {
+          modalLocationLink.href = getMapUrl(photo);
+          modalLocationLink.textContent = `📍 ${formatLocation(photo)} · Open map`;
+          modalLocationLink.classList.remove('hidden');
+        } else {
+          modalLocationLink.classList.add('hidden');
+          modalLocationLink.href = '#';
+        }
 
         captionDisplayContainer.classList.remove('hidden');
         captionEditContainer.classList.add('hidden');
+        setEditLocation(null);
 
         await loadAlbumPhotos();
       } catch (err) {
