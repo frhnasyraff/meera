@@ -90,6 +90,19 @@
       transform: scale(1.05);
     }
 
+    .lightbox-media-stage {
+      touch-action: pan-y;
+      will-change: transform, opacity;
+    }
+
+    .lightbox-media-stage.is-swiping {
+      transition: none;
+    }
+
+    .lightbox-media-stage.is-settling {
+      transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1), opacity 260ms ease;
+    }
+
     .handwritten-note {
       transform: rotate(-3deg);
     }
@@ -741,9 +754,11 @@
         </div>
       </div>
 
-      <div class="relative flex-1 flex items-center justify-center my-3 sm:my-4 overflow-hidden min-h-0 rounded-3xl sm:rounded-none bg-white/[0.03] sm:bg-transparent">
-        <img id="modalImage" src="" alt="Full view memory" class="max-h-[58vh] sm:max-h-[75vh] max-w-full object-contain rounded-2xl sm:rounded-lg shadow-2xl transition-transform duration-300">
-        <video id="modalVideo" class="hidden max-h-[58vh] sm:max-h-[75vh] max-w-full object-contain rounded-2xl sm:rounded-lg shadow-2xl bg-black" controls playsinline></video>
+      <div id="lightboxTouchArea" class="relative flex-1 flex items-center justify-center my-3 sm:my-4 overflow-hidden min-h-0 rounded-3xl sm:rounded-none bg-white/[0.03] sm:bg-transparent">
+        <div id="lightboxMediaStage" class="lightbox-media-stage w-full h-full flex items-center justify-center">
+          <img id="modalImage" src="" alt="Full view memory" class="max-h-[58vh] sm:max-h-[75vh] max-w-full object-contain rounded-2xl sm:rounded-lg shadow-2xl transition-transform duration-300">
+          <video id="modalVideo" class="hidden max-h-[58vh] sm:max-h-[75vh] max-w-full object-contain rounded-2xl sm:rounded-lg shadow-2xl bg-black" controls playsinline></video>
+        </div>
       </div>
 
       <div class="max-w-3xl mx-auto w-full text-center space-y-2 bg-white/10 backdrop-blur-md p-4 sm:p-6 rounded-3xl sm:rounded-2xl border border-white/10 shadow-2xl">
@@ -806,6 +821,8 @@
     let lightboxList = [];
     let touchStartX = 0;
     let touchStartY = 0;
+    let touchLastX = 0;
+    let isHorizontalSwipe = false;
     let currentTripTab = 'upcoming';
     let editingTripId = null;
     let tripCalendarCursor = new Date();
@@ -831,6 +848,8 @@
     const photosEmptyState = document.getElementById('photosEmptyState');
 
     const photoModal = document.getElementById('photoModal');
+    const lightboxTouchArea = document.getElementById('lightboxTouchArea');
+    const lightboxMediaStage = document.getElementById('lightboxMediaStage');
     const modalImage = document.getElementById('modalImage');
     const modalVideo = document.getElementById('modalVideo');
     const modalNote = document.getElementById('modalNote');
@@ -1841,6 +1860,7 @@ function addActivityRow(location = '', activity = '', day = 'Day 1') {
       activePhotoIndex = index;
       const photo = lightboxList[activePhotoIndex];
       if (!photo) return;
+      resetLightboxStage();
 
       if (isVideoMemory(photo)) {
         modalImage.classList.add('hidden');
@@ -1870,10 +1890,36 @@ function addActivityRow(location = '', activity = '', day = 'Day 1') {
       photoModal.showModal();
     }
 
-    function showLightboxOffset(offset) {
+    function resetLightboxStage() {
+      lightboxMediaStage.classList.remove('is-swiping', 'is-settling');
+      lightboxMediaStage.style.transform = 'translateX(0) scale(1)';
+      lightboxMediaStage.style.opacity = '1';
+    }
+
+    function showLightboxOffset(offset, animated = true) {
       if (!lightboxList.length) return;
-      activePhotoIndex = (activePhotoIndex + offset + lightboxList.length) % lightboxList.length;
-      openLightbox(activePhotoIndex, lightboxList);
+      const nextIndex = (activePhotoIndex + offset + lightboxList.length) % lightboxList.length;
+      if (!animated) {
+        openLightbox(nextIndex, lightboxList);
+        return;
+      }
+
+      const direction = offset > 0 ? -1 : 1;
+      lightboxMediaStage.classList.remove('is-swiping');
+      lightboxMediaStage.classList.add('is-settling');
+      lightboxMediaStage.style.transform = `translateX(${direction * 110}%) scale(0.96)`;
+      lightboxMediaStage.style.opacity = '0';
+
+      window.setTimeout(() => {
+        openLightbox(nextIndex, lightboxList);
+        lightboxMediaStage.classList.add('is-settling');
+        lightboxMediaStage.style.transform = `translateX(${-direction * 18}%) scale(0.98)`;
+        lightboxMediaStage.style.opacity = '0';
+        requestAnimationFrame(() => {
+          lightboxMediaStage.style.transform = 'translateX(0) scale(1)';
+          lightboxMediaStage.style.opacity = '1';
+        });
+      }, 170);
     }
 
     document.getElementById('modalEditBtn').addEventListener('click', () => {
@@ -1949,21 +1995,63 @@ function addActivityRow(location = '', activity = '', day = 'Day 1') {
 
     document.getElementById('modalCloseBtn').addEventListener('click', () => photoModal.close());
 
-    photoModal.addEventListener('touchstart', (e) => {
+    lightboxTouchArea.addEventListener('touchstart', (e) => {
       if (!photoModal.open || e.touches.length !== 1) return;
       touchStartX = e.touches[0].clientX;
       touchStartY = e.touches[0].clientY;
+      touchLastX = touchStartX;
+      isHorizontalSwipe = false;
+      lightboxMediaStage.classList.add('is-swiping');
+      lightboxMediaStage.classList.remove('is-settling');
     }, { passive: true });
 
-    photoModal.addEventListener('touchend', (e) => {
+    lightboxTouchArea.addEventListener('touchmove', (e) => {
+      if (!photoModal.open || !touchStartX || e.touches.length !== 1) return;
+      const touch = e.touches[0];
+      const diffX = touch.clientX - touchStartX;
+      const diffY = touch.clientY - touchStartY;
+      touchLastX = touch.clientX;
+      if (!isHorizontalSwipe && Math.abs(diffX) > 12 && Math.abs(diffX) > Math.abs(diffY) * 1.1) {
+        isHorizontalSwipe = true;
+      }
+      if (!isHorizontalSwipe) return;
+      e.preventDefault();
+      const limitedX = Math.max(-140, Math.min(140, diffX));
+      const progress = Math.min(1, Math.abs(limitedX) / 140);
+      lightboxMediaStage.style.transform = `translateX(${limitedX}px) scale(${1 - progress * 0.035})`;
+      lightboxMediaStage.style.opacity = `${1 - progress * 0.28}`;
+    }, { passive: false });
+
+    lightboxTouchArea.addEventListener('touchend', (e) => {
       if (!photoModal.open || !touchStartX) return;
       const touch = e.changedTouches[0];
       const diffX = touch.clientX - touchStartX;
       const diffY = touch.clientY - touchStartY;
+      const velocityHint = touch.clientX - touchLastX;
       touchStartX = 0;
       touchStartY = 0;
-      if (Math.abs(diffX) < 50 || Math.abs(diffX) < Math.abs(diffY) * 1.2) return;
-      showLightboxOffset(diffX < 0 ? 1 : -1);
+      touchLastX = 0;
+      lightboxMediaStage.classList.remove('is-swiping');
+      lightboxMediaStage.classList.add('is-settling');
+      if (!isHorizontalSwipe || Math.abs(diffX) < 58 || Math.abs(diffX) < Math.abs(diffY) * 1.1) {
+        isHorizontalSwipe = false;
+        lightboxMediaStage.style.transform = 'translateX(0) scale(1)';
+        lightboxMediaStage.style.opacity = '1';
+        return;
+      }
+      isHorizontalSwipe = false;
+      showLightboxOffset((diffX < 0 || velocityHint < -18) ? 1 : -1);
+    }, { passive: true });
+
+    lightboxTouchArea.addEventListener('touchcancel', () => {
+      touchStartX = 0;
+      touchStartY = 0;
+      touchLastX = 0;
+      isHorizontalSwipe = false;
+      lightboxMediaStage.classList.remove('is-swiping');
+      lightboxMediaStage.classList.add('is-settling');
+      lightboxMediaStage.style.transform = 'translateX(0) scale(1)';
+      lightboxMediaStage.style.opacity = '1';
     }, { passive: true });
 
     document.addEventListener('keydown', (e) => {
