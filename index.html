@@ -9,7 +9,7 @@
   <link rel="apple-touch-icon" sizes="180x180" href="icons/gallery-180.png">
   <link rel="icon" type="image/png" sizes="192x192" href="icons/gallery-192.png">
   <link rel="manifest" href="manifest.webmanifest">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Farhan & Meera — Digital Albums & Gallery</title>
 
   <!-- Fonts -->
@@ -119,6 +119,77 @@
         transform: rotate(-1deg);
       }
     }
+    * { letter-spacing: 0 !important; }
+    .mobile-bottom-nav { display: none; }
+    .album-card { min-width: 0; }
+    .album-card:focus-visible { outline: 2px solid #B26F54; outline-offset: 4px; }
+    .album-caption { padding: 12px 2px; }
+    .album-caption h3 { overflow-wrap: anywhere; }
+    .home-mobile-copy { display: none; }
+    @media (max-width: 1023px) {
+      body.bg-grain { background-image: none; background-color: #fff; }
+      .dark body.bg-grain { background-color: #110F0E; }
+      body > header { padding-top: env(safe-area-inset-top); border: 0; }
+      body > header > div:first-child { height: 64px; }
+      body > header > div:last-child { display: none; }
+      main { padding: 16px 20px calc(100px + env(safe-area-inset-bottom)) !important; }
+      main > * + * { margin-top: 28px !important; }
+      main > div:has(> section.hidden):not(:has(> section:not(.hidden))) { display: none; }
+      .mobile-bottom-nav { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); position: fixed; bottom: 0; left: 0; right: 0; z-index: 45; padding: 8px max(12px, env(safe-area-inset-left)) calc(8px + env(safe-area-inset-bottom)); background: rgba(255,255,255,.94); border-top: 1px solid rgba(38,34,31,.08); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+      .dark .mobile-bottom-nav { background: rgba(26,23,21,.95); border-color: #38322D; }
+      .mobile-bottom-nav button { min-height: 52px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; background: transparent !important; color: #85817D; font-size: 11px; font-weight: 500; border-radius: 8px; -webkit-tap-highlight-color: transparent; }
+      .mobile-bottom-nav button[aria-current="page"] { color: #B26F54; }
+      .dark .mobile-bottom-nav button[aria-current="page"] { color: #C88A70; }
+      .mobile-bottom-nav svg { width: 23px; height: 23px; }
+      .mobile-bottom-nav button[aria-current="page"] svg { stroke-width: 2.2; }
+      #homeSection { padding: 0; border: 0; border-radius: 0; background: none; box-shadow: none; overflow: visible; }
+      #homeSection > div { gap: 20px; }
+      #homeSection > div > div:first-child { display: none; }
+      .home-mobile-copy { display: block; margin-bottom: 20px; }
+      .home-mobile-copy h1 { font-size: 36px; line-height: 1.1; margin: 5px 0 8px; }
+      .home-mobile-copy p { font-size: 14px; color: #85817D; }
+      #homeSection .featured-frame { max-width: none; aspect-ratio: 4 / 3; border: 0; border-radius: 8px; box-shadow: none; transform: none; }
+      #homeSection .featured-frame > div:last-child { padding: 20px; }
+      #homeSection .featured-frame > div:last-child > span { display: none; }
+      #heroFeaturedTitle { font-size: 25px; font-style: normal; }
+      #heroFeaturedPlaceholder span { font-size: 22px; }
+      #homeHighlights:not(.hidden) { display: block; }
+      #homeHighlights > aside, #homeHighlights > div > button[data-page="gallery"] { display: none; }
+      #homeHighlights > div { display: grid; grid-template-columns: 1fr; gap: 24px; }
+      #homeHighlights > div > button { display: flex; flex-direction: column; padding: 0; border: 0; background: none; box-shadow: none; border-radius: 0; transform: none; }
+      #homeHighlights > div > button > p { display: none; }
+      #homeHighlights > div > button > h3 { order: -1; font-size: 23px; margin-bottom: 10px; }
+      #homeHighlights > div > button > div:first-child { width: 100%; height: auto; min-height: 92px; margin: 0; border-radius: 8px; padding: 16px; background: #F0F3EF; }
+      .dark #homeHighlights > div > button > div:first-child { background: #262B25; }
+      #homeTripTitle, #homeSongTitle { font-size: 23px; line-height: 1.2; overflow-wrap: anywhere; }
+      #homeHighlights button[data-page="trips"] > div:first-child { gap: 10px; }
+      #homeHighlights button[data-page="songs"] > div:first-child { background: #244B3C; display: flex; flex-direction: row; align-items: center; justify-content: flex-start; gap: 16px; }
+      #homeHighlights button[data-page="songs"] > div:first-child > div:first-child, #homeHighlights .handwritten-note { display: none; }
+      #homeSongCount { margin-top: 6px; }
+      #quoteSection { margin: 28px 0 0; padding: 20px 0; }
+      #quoteSection p { font-size: 21px; }
+      #gallerySection > div:first-child { flex-direction: row; align-items: center; gap: 12px; border: 0; padding: 0; }
+      #gallerySection > div:first-child p { display: none; }
+      #gallerySection h2 { font-size: 36px; line-height: 1.15; }
+      #btnCreateAlbumSection { width: 44px; height: 44px; flex-shrink: 0; padding: 0; justify-content: center; border-radius: 50%; background: #B26F54; color: #fff; }
+      #btnCreateAlbumSection span { display: none; }
+      #btnCreateAlbumSection svg { width: 22px; height: 22px; }
+      #albumsGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 12px; }
+      #albumsGrid .album-card { border: 0; background: transparent; box-shadow: none; border-radius: 0; }
+      #albumsGrid .album-card > div:first-child { aspect-ratio: 1; border-radius: 8px; }
+      .album-caption h3 { font-size: 20px; line-height: 1.15; }
+      .album-caption p { font-size: 11px; margin-top: 5px; }
+      #albumsEmptyState { padding: 28px 16px; border-radius: 8px; }
+      #tripsSection, #songsSection, #albumDetailViewSection { min-width: 0; }
+      #tripsSection h2, #songsSection h2 { font-size: 36px; }
+      dialog { max-width: calc(100vw - 20px) !important; max-height: calc(100dvh - 24px); }
+      dialog > div { max-height: calc(100dvh - 24px) !important; }
+      input, select, textarea { font-size: 16px !important; }
+      body > footer { display: none; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
+    }
   </style>
 </head>
 <body class="bg-paper-50 dark:bg-paper-950 text-paper-800 dark:text-paper-100 font-sans min-h-screen selection:bg-terracotta-500 selection:text-white bg-grain transition-colors duration-300">
@@ -185,10 +256,24 @@
       <button type="button" data-page="songs" class="nav-link shrink-0 px-3 py-2 rounded-xl text-xs font-semibold bg-paper-100 dark:bg-paper-900">Songs</button>
     </div>
   </header>
+  <nav class="mobile-bottom-nav" aria-label="Mobile navigation">
+    <button type="button" data-page="home" class="nav-link"><span>Home</span></button>
+    <button type="button" data-page="gallery" class="nav-link"><span>Gallery</span></button>
+    <button type="button" data-page="trips" class="nav-link"><span>Trips</span></button>
+    <button type="button" data-page="songs" class="nav-link"><span>Songs</span></button>
+  </nav>
+  <script>
+    document.querySelectorAll('.mobile-bottom-nav button').forEach(button => {
+      const icon = document.querySelector(`aside nav [data-page="${button.dataset.page}"] svg`).cloneNode(true);
+      icon.setAttribute('aria-hidden', 'true');
+      button.prepend(icon);
+    });
+  </script>
   <main class="lg:ml-64 min-h-screen px-4 sm:px-6 lg:px-10 py-8 sm:py-12 space-y-12">
 
     <!-- Hero Section -->
     <section id="homeSection" data-page-section="home" class="relative rounded-3xl overflow-hidden bg-gradient-to-br from-paper-100 via-paper-50 to-terracotta-500/5 dark:from-paper-900 dark:via-paper-950 dark:to-terracotta-500/10 border border-paper-200/80 dark:border-paper-800 p-8 sm:p-12 lg:p-16 shadow-sm">
+      <div class="home-mobile-copy"><p>hey, us.</p><h1 class="font-serif">Our little world</h1><p>gambar, jalan-jalan &amp; lagu kita.</p></div>
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
         <div class="lg:col-span-7 space-y-6">
           <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-terracotta-500/10 text-terracotta-600 dark:text-terracotta-400 text-xs font-semibold tracking-wider uppercase">
@@ -220,7 +305,7 @@
         </div>
 
         <div class="lg:col-span-5 relative flex justify-center lg:justify-end">
-          <div class="relative w-full max-w-sm aspect-[4/5] rounded-2xl overflow-hidden shadow-2xl border-4 border-white dark:border-paper-800 rotate-1 hover:rotate-0 transition-transform duration-500 group">
+          <div class="featured-frame relative w-full max-w-sm aspect-[4/5] rounded-2xl overflow-hidden shadow-2xl border-4 border-white dark:border-paper-800 rotate-1 hover:rotate-0 transition-transform duration-500 group">
             <div id="heroFeaturedPlaceholder" class="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-paper-100 via-paper-50 to-terracotta-500/10 dark:from-paper-900 dark:via-paper-950 dark:to-terracotta-500/20"><span class="font-serif text-3xl italic text-paper-800/35 dark:text-paper-100/35">No Album Yet</span></div>
             <img id="heroFeaturedImg" src="" alt="Featured memory" class="hidden w-full h-full object-cover img-zoom">
             <div class="absolute inset-0 bg-gradient-to-t from-paper-950/80 via-transparent to-transparent flex flex-col justify-end p-6 text-white opacity-90 group-hover:opacity-100 transition-opacity">
@@ -233,7 +318,7 @@
       </div>
     </section>
 
-    <section data-page-section="home" class="grid grid-cols-1 xl:grid-cols-[1fr_340px] gap-6">
+    <section id="homeHighlights" data-page-section="home" class="grid grid-cols-1 xl:grid-cols-[1fr_340px] gap-6">
       <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
         <button type="button" data-page="gallery" class="nav-link group text-left rounded-3xl border border-paper-200 dark:border-paper-800 bg-white/70 dark:bg-paper-900/70 p-5 shadow-sm hover:-translate-y-1 hover:shadow-xl hover:shadow-terracotta-500/10 transition-all">
           <div class="h-40 rounded-2xl overflow-hidden bg-paper-100 dark:bg-paper-950 mb-5 relative">
@@ -259,7 +344,7 @@
             </div>
           </div>
           <p class="text-[10px] uppercase tracking-widest text-sage-600 dark:text-sage-300 font-bold mb-1">Trip Planner</p>
-          <h3 class="font-serif text-2xl font-medium">Where next?</h3>
+          <h3 class="font-serif text-2xl font-medium">Next adventure</h3>
           <p class="text-sm text-paper-800/55 dark:text-paper-100/55 mt-2">Countdowns, budget, calendar, and trip notes in one place.</p>
         </button>
 
@@ -278,7 +363,7 @@
             </div>
           </div>
           <p class="text-[10px] uppercase tracking-widest text-emerald-700 dark:text-emerald-300 font-bold mb-1">Our Songs</p>
-          <h3 class="font-serif text-2xl font-medium">Soundtrack kita</h3>
+          <h3 class="font-serif text-2xl font-medium">On repeat</h3>
           <p class="text-sm text-paper-800/55 dark:text-paper-100/55 mt-2">Spotify links with mood and little notes.</p>
         </button>
       </div>
@@ -303,15 +388,16 @@
         <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-paper-200/80 dark:border-paper-800 pb-6">
           <div>
             <p class="text-xs uppercase tracking-widest text-sage-500 font-semibold mb-1">Our Memory Collections</p>
-            <h2 class="font-serif text-3xl sm:text-5xl font-medium">Gallery Albums</h2>
+            <h2 class="font-serif text-3xl sm:text-5xl font-medium">Our Gallery</h2>
           </div>
 
-          <button id="btnCreateAlbumSection" type="button" class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-paper-800 dark:bg-paper-100 text-paper-50 dark:text-paper-900 text-sm font-semibold hover:bg-terracotta-500 dark:hover:bg-terracotta-400 dark:hover:text-white transition-all shadow-sm active:scale-95">
+          <button id="btnCreateAlbumSection" type="button" aria-label="Create album" title="Create album" class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-paper-800 dark:bg-paper-100 text-paper-50 dark:text-paper-900 text-sm font-semibold hover:bg-terracotta-500 dark:hover:bg-terracotta-400 dark:hover:text-white transition-all shadow-sm active:scale-95">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
             <span>Create New Album</span>
           </button>
         </div>
 
+        <p id="gallerySummary" class="text-xs text-paper-800/50 dark:text-paper-100/50" aria-live="polite">Your little collection</p>
         <div id="albumsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
 
         <div id="albumsEmptyState" class="hidden text-center py-20 bg-white/50 dark:bg-paper-900/40 rounded-3xl border border-dashed border-paper-200 dark:border-paper-800">
@@ -1193,6 +1279,10 @@
     function setActiveNav(page) {
       navLinks.forEach(link => {
         const active = link.dataset.page === page;
+        if (link.closest('nav')) {
+          if (active) link.setAttribute('aria-current', 'page');
+          else link.removeAttribute('aria-current');
+        }
         link.classList.toggle('bg-terracotta-500/10', active);
         link.classList.toggle('text-terracotta-600', active);
         link.classList.toggle('dark:text-terracotta-300', active);
@@ -1215,7 +1305,7 @@
       const homeGalleryPreview = document.getElementById('homeGalleryPreview');
       const homeGalleryPreviewFallback = document.getElementById('homeGalleryPreviewFallback');
       if (previewPhoto?.url) {
-        homeGalleryPreview.src = previewPhoto.url;
+        homeGalleryPreview.src = isVideoMemory(previewPhoto) ? getVideoPosterUrl(previewPhoto.url) : previewPhoto.url;
         homeGalleryPreview.classList.remove('hidden');
         homeGalleryPreviewFallback.classList.add('hidden');
       } else {
@@ -1771,6 +1861,7 @@ function addActivityRow(location = '', activity = '', day = 'Day 1') {
     /* RENDER ALBUMS GRID & FUNCTIONS ASAL */
     function renderAlbumsGrid(allPhotos) {
       albumsGrid.innerHTML = '';
+      document.getElementById('gallerySummary').textContent = `${albums.length} albums \u00b7 ${allPhotos.length} memories`;
       if (!albums.length) {
         albumsEmptyState.classList.remove('hidden');
         return;
@@ -1780,22 +1871,27 @@ function addActivityRow(location = '', activity = '', day = 'Day 1') {
       albums.forEach(album => {
         const pCount = allPhotos.filter(p => p.albumId === album.id).length;
         const card = document.createElement('article');
-        card.className = 'album-card bg-white dark:bg-paper-900 border border-paper-200 dark:border-paper-800 rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-all group cursor-pointer';
+        card.className = 'album-card group cursor-pointer';
+        card.tabIndex = 0;
+        card.setAttribute('role', 'button');
+        card.setAttribute('aria-label', `Open ${album.title}`);
         card.innerHTML = `
-          <div class="relative aspect-[4/3] overflow-hidden bg-paper-100 dark:bg-paper-950">
-            <img src="${album.coverUrl}" alt="${escapeHTML(album.title)}" class="w-full h-full object-cover img-zoom">
-            <div class="absolute inset-0 bg-gradient-to-t from-paper-950/80 via-paper-950/20 to-transparent p-5 flex flex-col justify-end text-white">
-              <span class="text-[10px] font-semibold uppercase tracking-wider text-terracotta-400 mb-1">${escapeHTML(album.tag || 'Travel')}</span>
-              <h3 class="font-serif text-2xl font-medium leading-snug">${escapeHTML(album.title)}</h3>
-              <p class="text-xs text-white/70 line-clamp-1 italic font-serif mt-0.5">${escapeHTML(album.description || '')}</p>
-            </div>
-            <span class="absolute top-4 right-4 px-3 py-1 rounded-full bg-black/40 backdrop-blur text-white text-[10px] font-semibold">
-              ${pCount} photos
-            </span>
+          <div class="relative aspect-[4/3] rounded-lg overflow-hidden bg-paper-100 dark:bg-paper-950">
+            <img src="${escapeHTML(album.coverUrl || '')}" alt="${escapeHTML(album.title)}" loading="lazy" class="w-full h-full object-cover img-zoom">
+          </div>
+          <div class="album-caption">
+            <h3 class="font-serif text-2xl font-medium leading-snug">${escapeHTML(album.title)}</h3>
+            <p class="text-xs text-paper-800/50 dark:text-paper-100/50">${pCount} memories</p>
           </div>
         `;
 
         card.addEventListener('click', () => openAlbumDetail(album.id));
+        card.addEventListener('keydown', event => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            openAlbumDetail(album.id);
+          }
+        });
         albumsGrid.appendChild(card);
       });
     }
