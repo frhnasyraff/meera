@@ -190,6 +190,102 @@
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
     }
+    .gallery-tabs, .song-filters { display: flex; gap: 6px; flex-wrap: wrap; }
+    .gallery-tabs { max-width: 360px; padding: 4px; background: #F1F1EF; border-radius: 8px; }
+    .gallery-tabs button { flex: 1; }
+    .gallery-tabs button, .song-filters button { padding: 10px 16px; min-height: 44px; font-size: 13px; border-radius: 6px; }
+    .gallery-tabs [aria-selected="true"], .song-filters [aria-pressed="true"] { background: #B26F54; color: white; }
+    .song-filters button { background: #F1F1EF; }
+    .dark .gallery-tabs, .dark .song-filters button { background: #26221F; }
+    .dark .song-filters [aria-pressed="true"] { background: #B26F54; }
+    #allPhotosGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 3px; }
+    #allPhotosGrid:not(.hidden) { display: grid; }
+    #allPhotosGrid button { aspect-ratio: 1; position: relative; overflow: hidden; background: #EADFCF; }
+    #allPhotosGrid img { width: 100%; height: 100%; object-fit: cover; }
+    .mobile-only-action { display: none; }
+    .sheet-close { display: flex; justify-content: flex-end; padding: 12px 16px 0; }
+    .sheet-close button { min-width: 44px; min-height: 44px; font-size: 14px; }
+    @media (max-width: 1023px) {
+      body > header { display: none; }
+      main { padding-top: calc(24px + env(safe-area-inset-top)) !important; display: flex; flex-direction: column; gap: 24px; }
+      main > * + * { margin-top: 0 !important; }
+      #albumsViewSection > section { margin-top: 0 !important; }
+      .mobile-only-action { display: inline-flex; }
+      .home-mobile-copy { position: relative; padding-right: 40px; }
+      #mobileThemeAction { position: absolute; right: 0; top: 0; width: 44px; height: 44px; align-items: center; justify-content: center; }
+      #homeSection .featured-frame { aspect-ratio: 1; }
+      #homeHighlights > div { gap: 20px; }
+      #homeHighlights > div > button > div:first-child { background: transparent; padding: 0 0 16px; border-bottom: 1px solid #E7E7E4; border-radius: 0; }
+      .dark #homeHighlights > div > button > div:first-child { background: transparent; border-color: #38322D; }
+      #homeHighlights button[data-page="songs"] > div:first-child { padding: 4px 0 16px; min-height: 72px; border: 0; border-bottom: 1px solid #E7E7E4; border-radius: 0; background: transparent; gap: 12px; }
+      .dark #homeHighlights button[data-page="songs"] > div:first-child { background: transparent; border-color: #38322D; }
+      #homeHighlights button[data-page="songs"] > div:first-child > div:nth-child(2) { flex-shrink: 0; }
+      #homeHighlights button[data-page="songs"] > div:first-child > div:nth-child(2) > span:first-child { width: 48px; height: 48px; border-radius: 8px; background: #F0F3EF; color: #28764F; }
+      .dark #homeHighlights button[data-page="songs"] > div:first-child > div:nth-child(2) > span:first-child { background: #262B25; color: #83BD97; }
+      #homeHighlights button[data-page="songs"] > div:first-child > div:nth-child(2) svg { width: 28px; height: 28px; }
+      #homeHighlights button[data-page="songs"] > div:first-child > div:nth-child(3) { flex: 1; min-width: 0; }
+      #homeHighlights button[data-page="songs"] > div:first-child::after { content: '\203A'; flex-shrink: 0; color: #85817D; font: 26px/1 sans-serif; }
+      #homeSongTitle { color: #26221F; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 16px; font-weight: 600; line-height: 1.4; }
+      #homeSongCount { color: #85817D; font-size: 12px; margin-top: 3px; line-height: 1.5; }
+      .dark #homeSongTitle { color: #F5F0E6; }
+      .dark #homeSongCount { color: #AAA6A2; }
+      #quoteSection { display: none; }
+      #gallerySection, #songsSection { gap: 20px; }
+      #gallerySection > * + *, #songsSection > * + * { margin-top: 20px; }
+      #tripsSection > div:first-child { position: relative; padding: 0; border: 0; }
+      #tripsSection > div:first-child > div:first-child { padding-right: 52px; }
+      #tripsSection > div:first-child > div:first-child p { display: none; }
+      #tripsSection h2 { font-size: 32px; max-width: 260px; line-height: 1.1; }
+      #btnOpenCreateTrip, #btnOpenSongSheet { position: absolute; right: 0; top: 0; width: 44px; height: 44px; padding: 0; border-radius: 50%; background: #B26F54; color: #fff; display: inline-flex; align-items: center; justify-content: center; }
+      #btnOpenCreateTrip span { display: none; }
+      #btnOpenCreateTrip svg { width: 22px; height: 22px; }
+      #tripCalendarPanel { border: 0; border-radius: 0; padding: 0; background: transparent; box-shadow: none; }
+      #tripCalendarPanel > p, #tripCalendarPanel > div:first-child p, #tripAgendaList { display: none; }
+      #tripCalendarPanel .calendar-weekdays { display: grid; font-size: 10px; font-weight: 400; text-transform: none; }
+      #tripCalendarTitle { font-size: 23px; }
+      #btnTodayTripMonth { padding: 8px; background: transparent; }
+      #tripCalendarGrid { display: grid; gap: 1px; }
+      #tripCalendarGrid > div { min-height: 46px; padding: 3px 0; border: 0; border-radius: 0; background: transparent; overflow: visible; }
+      #tripCalendarGrid > div > div:first-child { justify-content: center; margin: 0; }
+      #tripCalendarGrid > div > div:first-child > span:last-child:not(:first-child) { display: none; }
+      #tripCalendarGrid > div > div:last-child { display: flex; justify-content: center; gap: 3px; }
+      #tripCalendarGrid .calendar-trip { width: 18px; height: 18px; padding: 0; border: 0; font-size: 0; background: transparent; display: grid; place-items: center; }
+      #tripCalendarGrid .calendar-trip::after { content: ''; display: block; width: 5px; height: 5px; border-radius: 50%; background: #B26F54; }
+      #tripCalendarGrid .calendar-trip[data-trip-type="Overnight"]::after { background: #73806B; }
+      #tripCalendarGrid > div > div:last-child > p { display: none; }
+      #tripsListGrid { grid-template-columns: 1fr; }
+      #tripsListGrid > article { border-width: 1px 0 0; border-radius: 0; padding: 20px 0; background: transparent; box-shadow: none; }
+      #tripsListGrid > article > div:nth-child(2) > div { background: transparent; padding: 8px 0; border-radius: 0; }
+      #songsSection > div:first-child { position: relative; padding-right: 50px; }
+      #songsSection > div:first-child > p, #songsSection > div:first-child > div > p:first-child { display: none; }
+      #songsSection h2 { font-size: 32px; line-height: 1.1; overflow-wrap: anywhere; }
+      #songsSection h2 span { display: none; }
+      #songsSection > div:first-child > div > p:last-child { font-size: 14px; }
+      #songsGrid { grid-template-columns: 1fr; gap: 24px; }
+      #songsGrid > article { border-width: 0 0 1px; border-radius: 0; padding: 0 0 24px; background: transparent; box-shadow: none; }
+      #songsGrid > article > div:first-child, #songsGrid > article > a { border-radius: 8px; }
+      #songsGrid h3 { white-space: normal; overflow-wrap: anywhere; }
+      #songsGrid .btn-delete-song { min-width: 44px; min-height: 44px; }
+      #albumDetailViewSection > div:nth-child(2) { border: 0; border-radius: 8px; min-height: 260px; padding: 20px; }
+      #albumDetailViewSection > div:first-child { padding-bottom: 12px; gap: 8px; }
+      #btnBackToAlbums { min-height: 44px; padding: 8px 0; background: transparent; }
+      #btnBackToAlbums span { font-size: 12px; }
+      #openUploadSheet { padding: 12px 18px; min-height: 44px; border-radius: 8px; background: #B26F54; color: #fff; align-items: center; justify-content: center; gap: 8px; }
+      dialog:not(#photoModal) { position: fixed; inset: auto 0 0; margin: 0; width: 100%; max-width: 100% !important; max-height: 92dvh; border-radius: 18px 18px 0 0; background: #fff; }
+      .dark dialog:not(#photoModal) { background: #26221F; }
+      dialog:not(#photoModal) > div { max-height: 92dvh !important; overflow-y: auto; border: 0; border-radius: 18px 18px 0 0; box-shadow: none; padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
+      #photoModal { margin: 0; max-width: 100% !important; max-height: 100dvh; height: 100dvh; background: #110F0E; }
+      #photoModal > div { max-height: none !important; padding: calc(12px + env(safe-area-inset-top)) 12px calc(12px + env(safe-area-inset-bottom)); background: #110F0E; }
+      #photoModal > div > div:first-child { padding-right: 48px; }
+      #photoModal > div > div:first-child > div:last-child { display: flex; gap: 6px; }
+      #photoModal > div > div:first-child button, #modalDownloadBtn { width: 44px; height: 44px; }
+      #modalCloseBtn { position: absolute; right: 12px; top: calc(12px + env(safe-area-inset-top)); }
+      #lightboxTouchArea { border-radius: 0; background: transparent; }
+      #modalImage, #modalVideo { border-radius: 0; max-height: 65dvh; }
+      #photoModal > div > div:last-child { border: 0; border-radius: 0; padding: 12px 4px; background: transparent; backdrop-filter: none; }
+      #captionDisplayContainer { border-radius: 0; padding: 12px 4px; background: transparent; border: 0; }
+      #uploadSheetContent > div, #songSheetContent > aside { border: 0; border-radius: 0; box-shadow: none; padding: 16px 20px; }
+    }
   </style>
 </head>
 <body class="bg-paper-50 dark:bg-paper-950 text-paper-800 dark:text-paper-100 font-sans min-h-screen selection:bg-terracotta-500 selection:text-white bg-grain transition-colors duration-300">
@@ -273,7 +369,7 @@
 
     <!-- Hero Section -->
     <section id="homeSection" data-page-section="home" class="relative rounded-3xl overflow-hidden bg-gradient-to-br from-paper-100 via-paper-50 to-terracotta-500/5 dark:from-paper-900 dark:via-paper-950 dark:to-terracotta-500/10 border border-paper-200/80 dark:border-paper-800 p-8 sm:p-12 lg:p-16 shadow-sm">
-      <div class="home-mobile-copy"><p>hey, us.</p><h1 class="font-serif">Our little world</h1><p>gambar, jalan-jalan &amp; lagu kita.</p></div>
+      <div class="home-mobile-copy"><p>hey, us.</p><h1 class="font-serif">Our little world</h1><p>sikit-sikit, jadi kenangan.</p><button id="mobileThemeAction" type="button" class="mobile-only-action" aria-label="Toggle theme" title="Toggle theme"></button></div>
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
         <div class="lg:col-span-7 space-y-6">
           <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-terracotta-500/10 text-terracotta-600 dark:text-terracotta-400 text-xs font-semibold tracking-wider uppercase">
@@ -282,7 +378,7 @@
           </div>
           <h1 class="font-serif text-4xl sm:text-6xl lg:text-7xl font-normal leading-[1.08] tracking-tight">
             Our Albums & <br>
-            <span class="italic font-normal text-terracotta-500 dark:text-terracotta-400">Sweet Memories</span>
+            <span class="italic font-normal text-terracotta-500 dark:text-terracotta-400">Our Photos</span>
           </h1>
           <p class="text-paper-800/70 dark:text-paper-100/70 text-base sm:text-lg max-w-xl font-light leading-relaxed">
             Tempat kecil untuk gambar, trips, and lagu-lagu yang rasa macam kita. Semua section dah asing, so senang nak buka mana yang kita nak.
@@ -371,7 +467,7 @@
       <aside class="rounded-3xl border border-paper-200 dark:border-paper-800 bg-white/60 dark:bg-paper-900/60 p-6 shadow-sm flex flex-col justify-between gap-10">
         <div>
           <p class="text-[10px] uppercase tracking-widest text-terracotta-500 font-bold mb-3">Tiny note</p>
-          <p class="font-serif italic text-3xl leading-tight text-paper-800/80 dark:text-paper-100/80">“Buka je mana-mana section, nanti semua memories ada tempat dia sendiri.”</p>
+          <p class="font-serif italic text-3xl leading-tight text-paper-800/80 dark:text-paper-100/80">“Sikit-sikit, jadi kenangan.”</p>
         </div>
         <div class="flex items-center justify-between border-t border-paper-200 dark:border-paper-800 pt-4">
           <span class="text-xs text-paper-800/45 dark:text-paper-100/45">Farhan & Meera</span>
@@ -397,7 +493,12 @@
           </button>
         </div>
 
+        <div class="gallery-tabs" role="tablist" aria-label="Gallery view">
+          <button id="galleryAlbumsTab" type="button" role="tab" aria-selected="true" aria-controls="albumsGrid">Albums</button>
+          <button id="galleryPhotosTab" type="button" role="tab" aria-selected="false" aria-controls="allPhotosGrid" tabindex="-1">All photos</button>
+        </div>
         <p id="gallerySummary" class="text-xs text-paper-800/50 dark:text-paper-100/50" aria-live="polite">Your little collection</p>
+        <div id="allPhotosGrid" class="hidden" role="tabpanel" aria-labelledby="galleryPhotosTab"></div>
         <div id="albumsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
 
         <div id="albumsEmptyState" class="hidden text-center py-20 bg-white/50 dark:bg-paper-900/40 rounded-3xl border border-dashed border-paper-200 dark:border-paper-800">
@@ -413,7 +514,7 @@
         <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-paper-200/80 dark:border-paper-800 pb-6">
           <div>
             <p class="text-xs uppercase tracking-widest text-terracotta-500 font-semibold mb-1">Travel Plans & Itinerary</p>
-            <h2 class="font-serif text-3xl sm:text-5xl font-medium">Trip Plans</h2>
+            <h2 class="font-serif text-3xl sm:text-5xl font-medium">Let's go somewhere</h2>
           </div>
 
           <!-- Susunan Butang Lebih Kemas di Mobile -->
@@ -430,7 +531,7 @@
           </div>
         </div>
 
-        <div class="bg-white/70 dark:bg-paper-900/70 border border-paper-200 dark:border-paper-800 rounded-3xl p-4 sm:p-6 shadow-sm space-y-4">
+        <div id="tripCalendarPanel" class="bg-white/70 dark:bg-paper-900/70 border border-paper-200 dark:border-paper-800 rounded-3xl p-4 sm:p-6 shadow-sm space-y-4">
           <div class="flex items-center justify-between gap-3">
             <div>
               <p class="text-[10px] uppercase tracking-widest text-terracotta-500 font-semibold">Trip Calendar</p>
@@ -446,7 +547,7 @@
               </button>
             </div>
           </div>
-          <div class="hidden sm:grid grid-cols-7 gap-1 text-center text-xs font-semibold uppercase tracking-wider text-paper-800/45 dark:text-paper-100/45">
+          <div class="calendar-weekdays hidden sm:grid grid-cols-7 gap-1 text-center text-xs font-semibold uppercase tracking-wider text-paper-800/45 dark:text-paper-100/45">
             <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
           </div>
           <div id="tripCalendarGrid" class="hidden sm:grid grid-cols-7 gap-2"></div>
@@ -467,10 +568,18 @@
         <div class="flex flex-col xl:flex-row xl:items-end justify-between gap-6">
           <div>
             <p class="text-xs uppercase tracking-widest text-terracotta-500 font-semibold mb-1">Soundtrack for us</p>
-            <h2 class="font-serif text-4xl sm:text-6xl font-medium">Our Songs <span class="text-terracotta-500">♡</span></h2>
-            <p class="text-paper-800/60 dark:text-paper-100/60 mt-2 max-w-xl">Lagu yang rasa macam kita. Save Spotify links, mood, and tiny notes for later.</p>
+            <h2 class="font-serif text-4xl sm:text-6xl font-medium">Our soundtrack</h2>
+            <p class="text-paper-800/60 dark:text-paper-100/60 mt-2 max-w-xl">lagu yang rasa macam kita.</p>
           </div>
-          <p class="font-serif italic text-terracotta-600 dark:text-terracotta-300 text-xl rotate-[-4deg]">Good songs,<br>better company. ♡</p>
+          <button id="btnOpenSongSheet" type="button" class="mobile-only-action" title="Add song" aria-label="Add song">+</button>
+        </div>
+        <div class="song-filters" role="group" aria-label="Filter songs by mood">
+          <button type="button" data-song-mood="All" aria-pressed="true">All</button>
+          <button type="button" data-song-mood="Roadtrip" aria-pressed="false">Roadtrip</button>
+          <button type="button" data-song-mood="Missing you" aria-pressed="false">Missing you</button>
+          <button type="button" data-song-mood="Date night" aria-pressed="false">Date night</button>
+          <button type="button" data-song-mood="Chill" aria-pressed="false">Chill</button>
+          <button type="button" data-song-mood="Happy" aria-pressed="false">Happy</button>
         </div>
 
         <div class="grid grid-cols-1 xl:grid-cols-[1fr_360px] gap-6 items-start">
@@ -478,7 +587,7 @@
             <div id="songsGrid" class="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-5"></div>
             <div id="songsEmptyState" class="hidden rounded-3xl border border-dashed border-paper-200 dark:border-paper-800 bg-white/50 dark:bg-paper-900/40 p-10 text-center">
               <h3 class="font-serif text-2xl font-medium">Belum ada lagu</h3>
-              <p class="text-xs text-paper-800/50 dark:text-paper-100/50 mt-1">Add Spotify link pertama dekat form sebelah.</p>
+              <p class="text-xs text-paper-800/50 dark:text-paper-100/50 mt-1">Tambah lagu untuk dengar sama-sama.</p>
             </div>
           </div>
 
@@ -553,7 +662,7 @@
       <div class="bg-white/80 dark:bg-paper-900/80 backdrop-blur border border-paper-200 dark:border-paper-800 rounded-3xl p-6 sm:p-8 shadow-sm">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
           <div>
-            <span class="text-xs tracking-widest uppercase font-semibold text-terracotta-500 dark:text-terracotta-400">Add Memories To Album</span>
+            <span class="text-xs tracking-widest uppercase font-semibold text-terracotta-500 dark:text-terracotta-400">Add Photos To Album</span>
           <h2 class="font-serif text-2xl font-medium mt-1">Upload Photo/Video + Caption</h2>
           </div>
           <p class="text-xs text-paper-800/50 dark:text-paper-100/50 max-w-sm">
@@ -672,6 +781,12 @@
     </section>
 
   </main>
+  <dialog id="songSheet" class="border-0 p-0 text-paper-800 dark:text-paper-100">
+    <div><div class="sheet-close"><button type="button" data-close-sheet="songSheet">Done</button></div><div id="songSheetContent"></div></div>
+  </dialog>
+  <dialog id="uploadSheet" class="border-0 p-0 text-paper-800 dark:text-paper-100">
+    <div><div class="sheet-close"><button type="button" data-close-sheet="uploadSheet">Done</button></div><div id="uploadSheetContent"></div></div>
+  </dialog>
 
   <!-- CREATE NEW TRIP MODAL -->
   <dialog id="createTripModal" class="bg-transparent backdrop:bg-paper-950/80 backdrop:backdrop-blur-sm p-0 max-w-2xl w-full rounded-3xl border-0 focus:outline-none">
@@ -945,6 +1060,9 @@
     let albums = [];
     let trips = [];
     let songs = [];
+    let galleryPhotos = [];
+    let galleryMode = 'albums';
+    let songMoodFilter = 'All';
     let currentAlbum = null;
     let albumPhotos = [];
     let currentLayout = 'masonry';
@@ -1029,7 +1147,7 @@
     function getEffectiveLocation(memory) {
       return Number.isFinite(memory?.location?.latitude) && Number.isFinite(memory?.location?.longitude)
         ? memory.location
-        : currentAlbum?.location || null;
+        : (albums.find(album => album.id === memory?.albumId) || currentAlbum)?.location || null;
     }
 
     function hasMemoryLocation(memory) {
@@ -1243,6 +1361,7 @@
 
       const photosSnap = await getDocs(photosCollection);
       const allPhotos = photosSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+      galleryPhotos = [...allPhotos].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
 
       const tripsSnap = await getDocs(tripsCollection);
       trips = tripsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -1271,6 +1390,8 @@
       renderHomeHighlights(allPhotos);
 
       renderAlbumsGrid(allPhotos);
+      renderAllPhotos();
+      updateGalleryMode();
       renderTripCalendar();
       renderTripsList();
       renderSongs();
@@ -1291,6 +1412,7 @@
 
     function showAppPage(page = 'home') {
       currentAlbum = null;
+      albumPhotos = [];
       albumDetailViewSection.classList.add('hidden');
       albumsViewSection.classList.remove('hidden');
       pageSections.forEach(section => {
@@ -1322,7 +1444,7 @@
       document.getElementById('homeTripCountdown').textContent = upcomingTrip ? getTripCountdownText(upcomingTrip) : 'soon';
 
       document.getElementById('homeSongTitle').textContent = songs[0]?.title || 'Our songs';
-      document.getElementById('homeSongCount').textContent = songs.length ? `${songs.length} saved song${songs.length > 1 ? 's' : ''}` : 'Add Spotify links here.';
+      document.getElementById('homeSongCount').textContent = songs[0]?.artist || (songs.length ? `${songs.length} lagu kita` : 'Tambah lagu pertama kita');
     }
 
     function spotifyEmbedUrl(url) {
@@ -1340,20 +1462,22 @@
 
     function renderSongs() {
       songsGrid.innerHTML = '';
-      if (!songs.length) {
+      const filteredSongs = songs.filter(song => songMoodFilter === 'All' || song.mood === songMoodFilter);
+      if (!filteredSongs.length) {
+        songsEmptyState.querySelector('h3').textContent = songs.length ? 'Belum ada lagu untuk mood ni' : 'Belum ada lagu';
         songsEmptyState.classList.remove('hidden');
         return;
       }
       songsEmptyState.classList.add('hidden');
 
-      songs.forEach(song => {
+      filteredSongs.forEach(song => {
         const embedUrl = spotifyEmbedUrl(song.spotifyUrl || '');
         const moodTone = song.mood === 'Roadtrip' ? 'bg-sage-500/10 text-sage-600 dark:text-sage-300' : song.mood === 'Missing you' ? 'bg-paper-200 dark:bg-paper-800 text-paper-800/70 dark:text-paper-100/70' : 'bg-terracotta-500/10 text-terracotta-600 dark:text-terracotta-300';
         const card = document.createElement('article');
         card.className = 'bg-white/80 dark:bg-paper-900/80 border border-paper-200 dark:border-paper-800 rounded-3xl p-4 shadow-sm space-y-4';
         card.innerHTML = `
           <div class="relative overflow-hidden rounded-2xl bg-paper-900 min-h-[152px]">
-            ${embedUrl ? `<iframe src="${embedUrl}" class="w-full h-[152px]" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>` : `<div class="h-[152px] flex items-center justify-center text-white/70 font-serif italic">Spotify link</div>`}
+            ${embedUrl ? `<iframe src="${embedUrl}" title="${escapeHTML(song.title || 'Spotify player')}" class="w-full h-[152px]" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>` : `<div class="h-[152px] flex items-center justify-center text-white/70 font-serif italic">Spotify link</div>`}
           </div>
           <div>
             <div class="flex items-start justify-between gap-3">
@@ -1485,7 +1609,7 @@
             ${dayTrips.length ? `<span class="text-[10px] font-semibold text-terracotta-500">${dayTrips.length}</span>` : ''}
           </div>
           <div class="space-y-1">
-            ${dayTrips.slice(0, 2).map(trip => { const tone = trip.tripType === 'Overnight' ? 'border-sage-500/30 bg-sage-500/10' : 'border-terracotta-500/30 bg-terracotta-500/10'; return `<button type="button" class="calendar-trip w-full text-left px-2 py-1 rounded-lg border ${tone} text-[10px] sm:text-xs leading-tight text-paper-800 dark:text-paper-100 truncate" data-trip-id="${trip.id}">${escapeHTML(trip.destination)}</button>`; }).join('')}
+            ${dayTrips.slice(0, 2).map(trip => { const tone = trip.tripType === 'Overnight' ? 'border-sage-500/30 bg-sage-500/10' : 'border-terracotta-500/30 bg-terracotta-500/10'; return `<button type="button" class="calendar-trip w-full text-left px-2 py-1 rounded-lg border ${tone} text-[10px] sm:text-xs leading-tight text-paper-800 dark:text-paper-100 truncate" data-trip-id="${trip.id}" data-trip-type="${escapeHTML(trip.tripType || '')}" aria-label="${escapeHTML(trip.destination)}" title="${escapeHTML(trip.destination)}">${escapeHTML(trip.destination)}</button>`; }).join('')}
             ${dayTrips.length > 2 ? `<p class="text-[10px] text-paper-800/45 dark:text-paper-100/45 px-1">+${dayTrips.length - 2} more</p>` : ''}
           </div>
         `;
@@ -1861,7 +1985,7 @@ function addActivityRow(location = '', activity = '', day = 'Day 1') {
     /* RENDER ALBUMS GRID & FUNCTIONS ASAL */
     function renderAlbumsGrid(allPhotos) {
       albumsGrid.innerHTML = '';
-      document.getElementById('gallerySummary').textContent = `${albums.length} albums \u00b7 ${allPhotos.length} memories`;
+      document.getElementById('gallerySummary').textContent = `${albums.length} albums \u00b7 ${allPhotos.length} photos`;
       if (!albums.length) {
         albumsEmptyState.classList.remove('hidden');
         return;
@@ -1881,7 +2005,7 @@ function addActivityRow(location = '', activity = '', day = 'Day 1') {
           </div>
           <div class="album-caption">
             <h3 class="font-serif text-2xl font-medium leading-snug">${escapeHTML(album.title)}</h3>
-            <p class="text-xs text-paper-800/50 dark:text-paper-100/50">${pCount} memories</p>
+            <p class="text-xs text-paper-800/50 dark:text-paper-100/50">${pCount} photos</p>
           </div>
         `;
 
@@ -1894,6 +2018,42 @@ function addActivityRow(location = '', activity = '', day = 'Day 1') {
         });
         albumsGrid.appendChild(card);
       });
+    }
+
+    function renderAllPhotos() {
+      const grid = document.getElementById('allPhotosGrid');
+      grid.replaceChildren();
+      galleryPhotos.forEach((photo, index) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.setAttribute('aria-label', photo.message || (isVideoMemory(photo) ? 'Open video' : 'Open photo'));
+        const image = document.createElement('img');
+        image.src = isVideoMemory(photo) ? getVideoPosterUrl(photo.url) : photo.url;
+        image.alt = photo.message || '';
+        image.loading = 'lazy';
+        button.append(image);
+        if (isVideoMemory(photo)) {
+          const badge = document.createElement('span');
+          badge.className = 'absolute bottom-1 right-1 text-white bg-black/60 px-2 py-1 text-xs rounded';
+          badge.textContent = 'Video';
+          button.append(badge);
+        }
+        button.addEventListener('click', () => openLightbox(index, galleryPhotos));
+        grid.append(button);
+      });
+    }
+
+    function updateGalleryMode() {
+      const photosMode = galleryMode === 'photos';
+      albumsGrid.classList.toggle('hidden', photosMode);
+      document.getElementById('allPhotosGrid').classList.toggle('hidden', !photosMode);
+      albumsEmptyState.classList.toggle('hidden', photosMode || albums.length > 0);
+      for (const [id, active] of [['galleryAlbumsTab', !photosMode], ['galleryPhotosTab', photosMode]]) {
+        const tab = document.getElementById(id);
+        tab.setAttribute('aria-selected', String(active));
+        tab.tabIndex = active ? 0 : -1;
+      }
+      document.getElementById('gallerySummary').textContent = photosMode && !galleryPhotos.length ? 'Belum ada photos lagi.' : `${albums.length} albums \u00b7 ${galleryPhotos.length} photos`;
     }
 
     async function openAlbumDetail(albumId) {
@@ -2034,6 +2194,60 @@ function addActivityRow(location = '', activity = '', day = 'Day 1') {
       });
     });
     setActiveNav('home');
+    for (const [id, mode] of [['galleryAlbumsTab', 'albums'], ['galleryPhotosTab', 'photos']]) {
+      document.getElementById(id).addEventListener('click', () => { galleryMode = mode; updateGalleryMode(); });
+      document.getElementById(id).addEventListener('keydown', event => {
+        if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+        event.preventDefault();
+        galleryMode = event.key === 'Home' ? 'albums' : event.key === 'End' ? 'photos' : galleryMode === 'albums' ? 'photos' : 'albums';
+        updateGalleryMode();
+        document.getElementById(galleryMode === 'albums' ? 'galleryAlbumsTab' : 'galleryPhotosTab').focus();
+      });
+    }
+    document.querySelectorAll('[data-song-mood]').forEach(button => button.addEventListener('click', () => {
+      songMoodFilter = button.dataset.songMood;
+      document.querySelectorAll('[data-song-mood]').forEach(item => item.setAttribute('aria-pressed', String(item === button)));
+      renderSongs();
+    }));
+
+    const themeAction = document.getElementById('mobileThemeAction');
+    themeAction.append(document.getElementById('moonIcon').cloneNode(true));
+    themeAction.firstChild.removeAttribute('id');
+    themeAction.firstChild.classList.remove('dark:hidden');
+    themeAction.addEventListener('click', () => document.getElementById('themeToggleBtn').click());
+    const songSheet = document.getElementById('songSheet');
+    const uploadSheet = document.getElementById('uploadSheet');
+    const songPanel = document.getElementById('songForm').closest('aside');
+    const uploadPanel = document.getElementById('uploadToAlbumForm').parentElement;
+    const openUpload = document.createElement('button');
+    openUpload.id = 'openUploadSheet';
+    openUpload.type = 'button';
+    openUpload.className = 'mobile-only-action';
+    openUpload.textContent = '+ Add photos / video';
+    uploadPanel.before(openUpload);
+    const songAnchor = document.createComment('Song form desktop position');
+    const uploadAnchor = document.createComment('Upload form desktop position');
+    songPanel.before(songAnchor);
+    uploadPanel.before(uploadAnchor);
+    const mobileLayout = matchMedia('(max-width: 1023px)');
+    function positionForms() {
+      if (mobileLayout.matches) {
+        document.getElementById('songSheetContent').append(songPanel);
+        document.getElementById('uploadSheetContent').append(uploadPanel);
+      } else {
+        songSheet.close(); uploadSheet.close();
+        songAnchor.after(songPanel);
+        uploadAnchor.after(uploadPanel);
+      }
+    }
+    positionForms();
+    mobileLayout.addEventListener('change', positionForms);
+    const songAddButton = document.getElementById('btnOpenSongSheet');
+    songAddButton.replaceChildren(document.querySelector('#btnCreateAlbumSection svg').cloneNode(true));
+    songAddButton.addEventListener('click', () => songSheet.showModal());
+    openUpload.addEventListener('click', () => uploadSheet.showModal());
+    document.querySelectorAll('[data-close-sheet]').forEach(button => button.addEventListener('click', () => document.getElementById(button.dataset.closeSheet).close()));
+    photoModal.addEventListener('close', () => modalVideo.pause());
 
     document.getElementById('songForm').addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -2053,6 +2267,7 @@ function addActivityRow(location = '', activity = '', day = 'Day 1') {
           createdAt: Date.now()
         });
         document.getElementById('songForm').reset();
+        songSheet.close();
         await loadData();
       } catch (err) {
         alert('Gagal save lagu: ' + err.message);
@@ -2301,7 +2516,7 @@ function addActivityRow(location = '', activity = '', day = 'Day 1') {
         modalImage.classList.remove('hidden');
       }
       modalNote.textContent = photo.message ? `"${photo.message}"` : 'No caption attached.';
-      modalTagBadge.textContent = currentAlbum ? currentAlbum.tag : 'Memory';
+      modalTagBadge.textContent = currentAlbum ? currentAlbum.tag : 'Photo';
       modalDateText.textContent = formatDate(photo.createdAt);
       modalMetaInfo.textContent = `${isVideoMemory(photo) ? 'Video' : 'Photo'} • Size: ${formatBytes(photo.size || 0)}`;
       if (hasMemoryLocation(photo)) {
@@ -2407,6 +2622,7 @@ function addActivityRow(location = '', activity = '', day = 'Day 1') {
         setEditLocation(null);
 
         await loadAlbumPhotos();
+        if (!currentAlbum) { renderAllPhotos(); }
       } catch (err) {
         alert('Gagal kemaskini caption: ' + err.message);
       } finally {
@@ -2425,7 +2641,7 @@ function addActivityRow(location = '', activity = '', day = 'Day 1') {
     }
 
     async function toggleFavorite(id) {
-      const target = albumPhotos.find(p => p.id === id);
+      const target = albumPhotos.find(p => p.id === id) || galleryPhotos.find(p => p.id === id);
       if (!target) return;
       target.isFavorite = !target.isFavorite;
 
