@@ -1,0 +1,15 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAllowedAccount() {
+      return request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.firebase.sign_in_provider == 'google.com'
+        && hashing.sha256(request.auth.token.email.lower().toUtf8()).toHexString() in ["6412DA893E3808BF30EB1326FD1D4F904E4A70CD6FF0A776953617858AC18A1A","B00AD1DC241A1ED3ABE48B9DB8C23DC34E69FF2343B224A8490B776044463152"];
+    }
+    match /{collectionName}/{documentId} {
+      allow read, write: if collectionName in ['albums', 'photos', 'trips', 'songs']
+        && isAllowedAccount();
+    }
+  }
+}

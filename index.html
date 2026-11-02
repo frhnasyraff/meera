@@ -60,6 +60,22 @@
   </script>
 
   <style>
+    body:not([data-auth-state="ready"]) > :not(#authScreen):not(script):not(style) { display: none !important; }
+    body[data-auth-state="ready"] > #authScreen { display: none; }
+    #authScreen { min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: max(32px, env(safe-area-inset-top)) 24px max(32px, env(safe-area-inset-bottom)); text-align: center; background: #FBF9F5; color: #26221F; }
+    .dark #authScreen { background: #110F0E; color: #F5F0E6; }
+    #authScreen img { width: 72px; height: 72px; border-radius: 16px; margin-bottom: 24px; }
+    #authScreen h1 { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 40px; line-height: 1.1; }
+    #authScreen p { max-width: 320px; font-size: 14px; line-height: 1.7; margin-top: 16px; }
+    #authScreen button { min-height: 48px; padding: 12px 22px; border-radius: 8px; margin-top: 20px; font-size: 14px; font-weight: 600; cursor: pointer; }
+    #googleLoginBtn { background: #B26F54; color: white; }
+    #googleLoginBtn:disabled { opacity: .6; cursor: wait; }
+    #authScreen [hidden] { display: none; }
+    #authStatus { color: #85817D; }
+    #authError { color: #AE3434; }
+    .dark #authError { color: #FF9B9B; }
+    .auth-spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; vertical-align: -2px; margin-right: 8px; animation: auth-spin .8s linear infinite; }
+    @keyframes auth-spin { to { transform: rotate(360deg); } }
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.03); }
     ::-webkit-scrollbar-thumb { background: rgba(178, 111, 84, 0.3); border-radius: 99px; }
@@ -288,7 +304,18 @@
     }
   </style>
 </head>
-<body class="bg-paper-50 dark:bg-paper-950 text-paper-800 dark:text-paper-100 font-sans min-h-screen selection:bg-terracotta-500 selection:text-white bg-grain transition-colors duration-300">
+<body data-auth-state="locked" class="bg-paper-50 dark:bg-paper-950 text-paper-800 dark:text-paper-100 font-sans min-h-screen selection:bg-terracotta-500 selection:text-white bg-grain transition-colors duration-300">
+  <section id="authScreen" aria-labelledby="authTitle">
+    <img src="icons/gallery-180.png" alt="" width="72" height="72">
+    <h1 id="authTitle">Farhan &amp; Meera</h1>
+    <p>Tempat kecil, untuk kita berdua.</p>
+    <p id="authStatus" role="status" aria-live="polite">Tunggu sekejap...</p>
+    <button id="googleLoginBtn" type="button" disabled>Continue with Google</button>
+    <button id="authRetryBtn" type="button" hidden>Cuba lagi</button>
+    <button id="authSwitchAccountBtn" type="button" hidden>Tukar akaun</button>
+    <p id="authError" role="alert" hidden></p>
+    <noscript><p>Hidupkan JavaScript untuk log masuk.</p></noscript>
+  </section>
 
   <!-- App Shell Navigation -->
   <aside class="hidden lg:flex fixed inset-y-0 left-0 z-40 w-64 border-r border-paper-200/80 dark:border-paper-800 bg-paper-50/90 dark:bg-paper-950/90 backdrop-blur-xl px-6 py-8 flex-col justify-between">
@@ -1034,8 +1061,10 @@
     <p>Farhan & Meera · shared through Cloudinary + Firestore</p>
   </footer>
 
+  <script src="private-access.js"></script>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
     import { getFirestore, collection, getDocs, doc, setDoc, updateDoc, deleteDoc, query, where } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -1048,6 +1077,12 @@
     };
 
     const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const allowedEmailHashes = window.PRIVATE_GALLERY_EMAIL_HASHES || [];
+    let approvedUid = null;
+    const googleProvider = new GoogleAuthProvider();
+    googleProvider.setCustomParameters({ prompt: 'select_account' });
+    let authGeneration = 0;
     const firestore = getFirestore(app);
     const albumsCollection = collection(firestore, 'albums');
     const photosCollection = collection(firestore, 'photos');
@@ -1338,6 +1373,7 @@
     }
 
     async function uploadToCloudinary(file) {
+      if (!isAllowedAccount(auth.currentUser)) throw new Error('Sila log masuk sebelum upload.');
       const mediaType = getMediaType(file);
       const formData = new FormData();
       formData.append('file', file);
@@ -1356,14 +1392,19 @@
     }
 
     async function loadData() {
+      if (!isAllowedAccount(auth.currentUser)) throw new Error('Sila log masuk dengan akaun yang dibenarkan.');
+      const generation = authGeneration;
       const albumsSnap = await getDocs(albumsCollection);
+      if (generation !== authGeneration) return;
       albums = albumsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
 
       const photosSnap = await getDocs(photosCollection);
+      if (generation !== authGeneration) return;
       const allPhotos = photosSnap.docs.map(d => ({ id: d.id, ...d.data() }));
       galleryPhotos = [...allPhotos].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
 
       const tripsSnap = await getDocs(tripsCollection);
+      if (generation !== authGeneration) return;
       trips = tripsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
 
       try {
@@ -1373,6 +1414,7 @@
         console.warn('Songs collection unavailable yet:', err);
         songs = [];
       }
+      if (generation !== authGeneration) return;
 
       document.getElementById('statAlbumCount').textContent = albums.length;
       document.getElementById('statTotalCount').textContent = allPhotos.length;
@@ -2076,8 +2118,12 @@ function addActivityRow(location = '', activity = '', day = 'Day 1') {
 
     async function loadAlbumPhotos() {
       if (!currentAlbum) return;
+      if (!isAllowedAccount(auth.currentUser)) return;
+      const generation = authGeneration;
+      const albumId = currentAlbum.id;
       const q = query(photosCollection, where('albumId', '==', currentAlbum.id));
       const snap = await getDocs(q);
+      if (generation !== authGeneration || currentAlbum?.id !== albumId) return;
       albumPhotos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
       document.getElementById('albumHeaderMeta').textContent = `${albumPhotos.length} photos • Created ${formatDate(currentAlbum.createdAt)}`;
@@ -2776,7 +2822,135 @@ function addActivityRow(location = '', activity = '', day = 'Day 1') {
       renderAlbumPhotos();
     });
 
-    window.onload = loadData;
+    function isAllowedAccount(user) {
+      return !!user && user.emailVerified === true
+        && user.uid === approvedUid
+        && user.providerData.some(provider => provider.providerId === 'google.com');
+    }
+    async function matchesAllowedAccount(user) {
+      if (!user?.emailVerified || !user.providerData.some(provider => provider.providerId === 'google.com')) return false;
+      const bytes = new TextEncoder().encode((user.email || '').toLowerCase());
+      const digest = await crypto.subtle.digest('SHA-256', bytes);
+      const hash = [...new Uint8Array(digest)].map(byte => byte.toString(16).padStart(2, '0')).join('').toUpperCase();
+      return allowedEmailHashes.includes(hash);
+    }
+
+    const loginButton = document.getElementById('googleLoginBtn');
+    const authStatus = document.getElementById('authStatus');
+    const authError = document.getElementById('authError');
+    const authRetry = document.getElementById('authRetryBtn');
+    const authSwitch = document.getElementById('authSwitchAccountBtn');
+    function lockApp() {
+      approvedUid = null;
+      document.body.dataset.authState = 'locked';
+      document.querySelectorAll('dialog[open]').forEach(dialog => dialog.close());
+      modalVideo.pause();
+      modalVideo.removeAttribute('src');
+      modalImage.removeAttribute('src');
+      document.getElementById('heroFeaturedImg').removeAttribute('src');
+      document.getElementById('homeGalleryPreview').removeAttribute('src');
+      document.getElementById('albumHeaderCoverImg').removeAttribute('src');
+      [albumsGrid, galleryContainer, tripsListGrid, songsGrid, tripCalendarGrid, tripAgendaList, document.getElementById('allPhotosGrid')].forEach(element => element.replaceChildren());
+      albums = []; trips = []; songs = []; galleryPhotos = []; albumPhotos = []; lightboxList = [];
+      currentAlbum = null;
+      document.querySelectorAll('form').forEach(form => form.reset());
+      authRetry.hidden = true;
+      authSwitch.hidden = true;
+      authError.hidden = true;
+    }
+    function showAuthError(message) {
+      authError.textContent = message;
+      authError.hidden = false;
+    }
+    function authErrorMessage(error) {
+      const messages = {
+        'auth/popup-closed-by-user': 'Login dibatalkan. Boleh cuba lagi.',
+        'auth/popup-blocked': 'Benarkan pop-up untuk login. Kalau dari app lain, buka link ni dalam Safari.',
+        'auth/unauthorized-domain': 'Domain website belum dibenarkan dalam Firebase Authentication.',
+        'auth/operation-not-allowed': 'Google login belum dihidupkan dalam Firebase Authentication.',
+        'auth/network-request-failed': 'Connection tak lepas. Check internet dan cuba lagi.',
+        'auth/operation-not-supported-in-this-environment': 'Buka link website dalam Safari untuk login.'
+      };
+      return messages[error.code] || 'Login tak lepas. Cuba lagi sekejap.';
+    }
+    loginButton.addEventListener('click', async () => {
+      loginButton.disabled = true;
+      loginButton.innerHTML = '<span class="auth-spinner" aria-hidden="true"></span>Signing in...';
+      authError.hidden = true;
+      try { await signInWithPopup(auth, googleProvider); }
+      catch (error) { showAuthError(authErrorMessage(error)); }
+      finally {
+        loginButton.disabled = false;
+        loginButton.textContent = 'Continue with Google';
+      }
+    });
+    async function unlockForUser(user) {
+      const generation = ++authGeneration;
+      lockApp();
+      loginButton.hidden = false;
+      loginButton.disabled = false;
+      if (!allowedEmailHashes.length) {
+        authStatus.textContent = 'Login belum siap disetup.';
+        loginButton.disabled = true;
+        return;
+      }
+      if (!user) {
+        authStatus.textContent = 'Log masuk untuk buka album kita.';
+        return;
+      }
+      let allowed = false;
+      try { allowed = await matchesAllowedAccount(user); }
+      catch { showAuthError('Buka website melalui link HTTPS untuk login.'); return; }
+      if (generation !== authGeneration) return;
+      if (!allowed) {
+        authStatus.textContent = 'Akaun ni tak ada akses.';
+        showAuthError('Guna akaun Google yang dijemput sahaja.');
+        authSwitch.hidden = false;
+        return;
+      }
+      loginButton.hidden = true;
+      approvedUid = user.uid;
+      authStatus.textContent = 'Buka album kita...';
+      try {
+        await user.getIdToken();
+        await loadData();
+        if (generation !== authGeneration || auth.currentUser?.uid !== user.uid) return;
+        document.body.dataset.authState = 'ready';
+        showAppPage('home');
+      } catch (error) {
+        if (generation !== authGeneration) return;
+        authStatus.textContent = 'Album belum dapat dibuka.';
+        showAuthError(error.code === 'permission-denied' ? 'Akses data belum dibenarkan. Semak Firestore Rules untuk akaun ni.' : 'Tak dapat load album. Check connection dan cuba lagi.');
+        authRetry.hidden = false;
+        authSwitch.hidden = false;
+      }
+    }
+    authRetry.addEventListener('click', () => unlockForUser(auth.currentUser));
+    async function logOut() {
+      ++authGeneration;
+      lockApp();
+      try { await signOut(auth); }
+      catch { showAuthError('Tak dapat log keluar. Cuba lagi.'); authSwitch.hidden = false; }
+    }
+    authSwitch.addEventListener('click', logOut);
+    for (const parent of [document.querySelector('aside > div:last-child'), document.querySelector('.home-mobile-copy')]) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'text-xs text-paper-800/50 dark:text-paper-100/50 mt-3 py-2';
+      button.textContent = 'Log out';
+      button.addEventListener('click', logOut);
+      parent.append(button);
+    }
+    if (location.protocol === 'file:') {
+      authStatus.textContent = 'Buka link website untuk log masuk.';
+      loginButton.disabled = true;
+    } else {
+      onAuthStateChanged(auth, unlockForUser, error => {
+        lockApp();
+        authStatus.textContent = 'Login belum dapat dimuatkan.';
+        showAuthError(authErrorMessage(error));
+      });
+    }
   </script>
 </body>
 </html>
